@@ -73,7 +73,7 @@ const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
             style={{ marginTop: 15 }}
             icon="send"
             mode="contained"
-            onPress={methods.handleSubmit(async (data: SignUpForm) =>
+            onPress={methods.handleSubmit(async (data: SignupData) =>
               createUser(data),
             )}
           >
