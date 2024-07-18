@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import Header from "@/components/Header";
 import { StyleSheet, View, Modal } from "react-native";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
@@ -11,6 +11,7 @@ import { FormProvider, useForm } from "react-hook-form";
 
 import FormInput from "@/components/FormInput";
 import { LoginData } from "@/types/auth";
+import useUser from "@/hooks/useUser";
 
 type LoginScreenProps = {
   navigation: StackNavigationProp<HomePageStackParamList>;
@@ -19,7 +20,15 @@ type LoginScreenProps = {
 
 const LoginScreen: FC<LoginScreenProps> = ({ navigation }) => {
   const methods = useForm<LoginData>();
-  const { handleLogin, isLoading, isError } = useLogin();
+
+  const { handleLogin, isLoading, isError } = useLogin({navigation});
+  const {user} = useUser();
+
+  useEffect(()=>{
+    if(user) {
+      navigation.navigate("Home" as any)
+    }
+  },[user])
 
   return (
     <FormProvider {...methods}>

@@ -58,7 +58,7 @@ const FormInput: FC<FormInputProps> = ({
 
 const styles = StyleSheet.create({
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: "#000",
   },
 });
 

@@ -1,14 +1,15 @@
 import Cookies from 'js-cookie';
-import { LoginForm } from "@/app/(screens)/login";
 import { useState } from "react";
-import { IUser } from '@/types/auth';
+import { IUser, LoginData } from '@/types/auth';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { HomePageStackParamList } from '@/components/navigation/HomePageNavigation';
 
-const useLogin = () => {
+const useLogin = ({navigation}: { navigation: StackNavigationProp<HomePageStackParamList>}) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [user, setUser] = useState<IUser>()
 
-  const handleLogin = async (formData: LoginForm) => {
+  const handleLogin = async (formData: LoginData) => {
     try {
       const response = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
@@ -23,6 +24,7 @@ const useLogin = () => {
       }
 
       const data = await response.json()
+      navigation.navigate("Home" as any)
       setIsError(false)
     }
     catch(e) {

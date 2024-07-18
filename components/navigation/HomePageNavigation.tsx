@@ -1,3 +1,4 @@
+import HomeScreen from "@/app/(screens)/home";
 import LoginScreen from "@/app/(screens)/login";
 import SignUpScreen from "@/app/(screens)/signup";
 import { NavigationContainer } from "@react-navigation/native";
@@ -7,6 +8,7 @@ import { useTheme } from "react-native-paper";
 export type HomePageStackParamList = {
   Login: typeof LoginScreen;
   Signup: typeof SignUpScreen;
+  Home: typeof HomeScreen
 };
 
 const Stack = createStackNavigator<HomePageStackParamList>();
@@ -23,6 +25,7 @@ const HomePageNavigation = () => {
       >
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Signup" component={SignUpScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

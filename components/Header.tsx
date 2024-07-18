@@ -10,7 +10,7 @@ const Header: FC = () => {
       variant="displayMedium"
       style={[styles.text, { color: colors.primary }]}
     >
-      ProFinder
+      TicketMate
     </Text>
   );
 };
