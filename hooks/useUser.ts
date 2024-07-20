@@ -1,19 +1,22 @@
-import { useState } from 'react';
-import Cookies from 'js-cookie';
+import { useEffect, useState } from 'react';
 import { IUser } from '@/types/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const useUser = () => {
-    const storedUser = Cookies.get('user');
-    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-    const [user, setUser] = useState<IUser | null>(parsedUser);
+    const [user, setUser] = useState<IUser | null>();
 
-    const logoutUser = () => {
-        setUser(null);
-        Cookies.remove('user');
-    };
+    useEffect(() => {
+        getUserData()
+    }, [])
 
-    return { user, logoutUser };
+    const getUserData = async () => {
+        const storedUser = await AsyncStorage.getItem('user')
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+        setUser(parsedUser)
+    }
+
+    return { user };
 };
 
 export default useUser;

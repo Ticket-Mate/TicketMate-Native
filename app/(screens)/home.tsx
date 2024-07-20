@@ -1,8 +1,10 @@
 import { HomePageStackParamList } from "@/components/navigation/HomePageNavigation";
 import { ThemedView } from "@/components/ThemedView";
+import useLogout from "@/hooks/useLogout";
+import useUser from "@/hooks/useUser";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { FC } from "react";
-import { Text } from "react-native-paper";
+import { Button, Text } from "react-native-paper";
 
 type HomeScreenProps = {
     navigation: StackNavigationProp<HomePageStackParamList>;
@@ -10,9 +12,12 @@ type HomeScreenProps = {
 
 
 const HomeScreen: FC<HomeScreenProps> = ({ navigation }) => {
+    const {user} = useUser()
+    const {logoutUser} = useLogout({navigation})
     return (
-        <ThemedView>
-            <Text>Home Screen</Text>
+        <ThemedView style={{ paddingTop: 50 }}>
+            <Text>Home Screen + {JSON.stringify(user)}</Text>
+            <Button onPress={logoutUser}>LogOut</Button>
         </ThemedView>
     )
 }
