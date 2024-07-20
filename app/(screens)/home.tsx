@@ -15,7 +15,7 @@ const HomeScreen: FC<HomeScreenProps> = ({ navigation }) => {
     const {user} = useUser()
     const {logoutUser} = useLogout({navigation})
     return (
-        <ThemedView>
+        <ThemedView style={{ paddingTop: 50 }}>
             <Text>Home Screen + {JSON.stringify(user)}</Text>
             <Button onPress={logoutUser}>LogOut</Button>
         </ThemedView>
