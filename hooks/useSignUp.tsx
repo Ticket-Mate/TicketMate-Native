@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { SignupData } from "@/types/auth";
+import { register } from "@/api/auth";
 
 const useSignUp = () => {
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -9,18 +10,7 @@ const useSignUp = () => {
   
   const createUser = async (formData: SignupData) => {
     try {
-      const response = await fetch('http://localhost:3000/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      })
-
-      if(!response.ok) {
-        throw new Error('Failed to Sign-Up')
-      }
-
+      await register(formData)
       setIsSuccess(true)
       setIsError(false)
     }

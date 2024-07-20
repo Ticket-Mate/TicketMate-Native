@@ -1,8 +1,8 @@
-import Cookies from 'js-cookie';
 import { useState } from "react";
 import { IUser, LoginData } from '@/types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { HomePageStackParamList } from '@/components/navigation/HomePageNavigation';
+import { login } from '@/api/auth';
 
 const useLogin = ({navigation}: { navigation: StackNavigationProp<HomePageStackParamList>}) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -11,19 +11,11 @@ const useLogin = ({navigation}: { navigation: StackNavigationProp<HomePageStackP
 
   const handleLogin = async (formData: LoginData) => {
     try {
-      const response = await fetch('http://localhost:3000/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      })
+      
+      const { data: user, status } = await login(formData)
+      
+      // TODO: save in the storage modify updateUser
 
-      if(!response.ok) {
-        throw new Error('Failed to Login')
-      }
-
-      const data = await response.json()
       navigation.navigate("Home" as any)
       setIsError(false)
     }
@@ -37,7 +29,7 @@ const useLogin = ({navigation}: { navigation: StackNavigationProp<HomePageStackP
 
   const updateUser = (newUserData: IUser) => {
     setUser(newUserData);
-    Cookies.set('user', JSON.stringify(newUserData), { expires: 7 });
+    // Cookies.set('user', JSON.stringify(newUserData), { expires: 7 });
 };
 
   return { handleLogin, user, isLoading, isError };
