@@ -16,12 +16,7 @@ const useUser = () => {
         setUser(parsedUser)
     }
 
-    const logoutUser = () => {
-        setUser(null);
-        AsyncStorage.removeItem('user');
-    };
-
-    return { user, logoutUser };
+    return { user };
 };
 
 export default useUser;
