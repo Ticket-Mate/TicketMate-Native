@@ -2,6 +2,7 @@ import { useState } from "react";
 import { IUser, LoginData } from '@/types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { HomePageStackParamList } from '@/components/navigation/HomePageNavigation';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { login } from '@/api/auth';
 
 const useLogin = ({navigation}: { navigation: StackNavigationProp<HomePageStackParamList>}) => {
@@ -13,9 +14,7 @@ const useLogin = ({navigation}: { navigation: StackNavigationProp<HomePageStackP
     try {
       
       const { data: user, status } = await login(formData)
-      
-      // TODO: save in the storage modify updateUser
-
+      await updateUser(user)
       navigation.navigate("Home" as any)
       setIsError(false)
     }
@@ -27,9 +26,9 @@ const useLogin = ({navigation}: { navigation: StackNavigationProp<HomePageStackP
     }
   }
 
-  const updateUser = (newUserData: IUser) => {
+  const updateUser = async (newUserData: IUser) => {
     setUser(newUserData);
-    // Cookies.set('user', JSON.stringify(newUserData), { expires: 7 });
+    await AsyncStorage.setItem('user', JSON.stringify(newUserData));
 };
 
   return { handleLogin, user, isLoading, isError };

@@ -6,7 +6,7 @@ export function ThemedView({ ...otherProps }: ViewProps) {
 
   return (
     <View
-      style={{ backgroundColor: colors.background, flex: 1 }}
+      style={{ backgroundColor: colors.background, flex: 1, paddingTop: 50 }}
       {...otherProps}
     />
   );
