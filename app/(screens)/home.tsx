@@ -10,6 +10,9 @@ import { Button, Text } from "react-native-paper";
 import Card from '@/components/Card';
 import { getEvents } from '../../api/event';
 import { IEvent } from '@/types/event';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 type HomeScreenProps = {
   navigation: StackNavigationProp<HomePageStackParamList>;
@@ -33,10 +36,40 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       Alert.alert('Error', 'Failed to fetch events. Please try again.');
     }
   };
+  const getUserData = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('user');
+      return userData ? JSON.parse(userData) : null;
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      return null;
+    }
+  };
+  const handleBellPress = async (eventId: string) => {
+    console.log('Bell pressed for event:', eventId);
 
-  const handleBellPress = (eventId: string) => {
-    console.log('Bell pressed for sold-out event:', eventId);
-    // Implement notification subscription logic here
+    try {
+      const userData = await getUserData();
+      const accessToken = await AsyncStorage.getItem('accessToken');
+
+      if (!userData || !accessToken) {
+        console.error('No user data or access token found');
+        return;
+      }
+      const response = await axios.post(
+        'https://http://localhost:3000/api/notifications',
+        { userId: userData._id, eventId },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      if (response.status === 201) {
+        console.log('Notification created successfully');
+      } else { console.error('Failed to create notification'); }
+    } catch (error) { console.error('Error creating notification:', error); }
   };
 
   const handleBuyTicket = (eventId: string) => {
@@ -52,8 +85,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         data={events}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <Card 
-            event={item} 
+          <Card
+            event={item}
             onBellPress={() => handleBellPress(item._id)}
             onBuyTicket={() => handleBuyTicket(item._id)}
           />
@@ -74,8 +107,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
-    color:'rgb(155, 106, 173)',
-    textAlign:'center'
+    color: 'rgb(155, 106, 173)',
+    textAlign: 'center'
   },
 });
 

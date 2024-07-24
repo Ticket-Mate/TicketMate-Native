@@ -16,8 +16,8 @@ const Card: React.FC<CardProps> = ({ event, onBellPress, onBuyTicket }) => {
 
   return (
     <View style={styles.card}>
-      <Image 
-        source={{ uri: event.images[0]?.url || '../assets/images/concert.png' }} 
+      <Image
+        source={{ uri: event.images[0]?.url || '../assets/images/concert.png' }}
         style={styles.image}
       />
       <View style={styles.contentContainer}>
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 90,
     marginRight: 12,
-    marginTop:8
+    marginTop: 8
   },
   contentContainer: {
     flex: 1,
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     flex: 1,
-    color:'white'
+    color: 'white'
   },
   description: {
     fontSize: 15,
