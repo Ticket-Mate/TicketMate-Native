@@ -39,6 +39,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const getUserData = async () => {
     try {
       const userData = await AsyncStorage.getItem('user');
+      console.log('Retrieved user data from AsyncStorage:', userData); // Debugging log
+
       return userData ? JSON.parse(userData) : null;
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -50,14 +52,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
     try {
       const userData = await getUserData();
-      const accessToken = await AsyncStorage.getItem('accessToken');
+      const accessToken = userData?.accessToken;
+      console.log('Access token:', accessToken); // Debugging log
 
       if (!userData || !accessToken) {
         console.error('No user data or access token found');
         return;
       }
       const response = await axios.post(
-        'https://http://localhost:3000/api/notifications',
+        'http://localhost:3000/notifications/',
         { userId: userData._id, eventId },
         {
           headers: {
