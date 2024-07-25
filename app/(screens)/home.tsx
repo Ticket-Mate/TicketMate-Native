@@ -89,7 +89,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        paddingTop: 100,
+        paddingLeft:20,
+        paddingRight:20,
         backgroundColor: 'black',
     },
     title: {

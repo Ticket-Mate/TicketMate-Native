@@ -1,11 +1,14 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { Text } from "react-native-paper";
+import { ThemedView } from "@/components/ThemedView";
+import { StyleSheet } from "react-native";
+
 
 const ProfileScreen: React.FC = () => {
   return (
-    <View style={styles.container}>
-      <Text>User Screen</Text>
-    </View>
+    <ThemedView style={styles.container}>
+      <Text variant="headlineSmall">User Screen</Text>
+    </ThemedView>
   );
 };
 

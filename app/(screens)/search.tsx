@@ -1,11 +1,13 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { ThemedView } from "@/components/ThemedView";
+import { StyleSheet } from "react-native";
+import { Text } from "react-native-paper";
 
 const SearchScreen: React.FC = () => {
   return (
-    <View style={styles.container}>
-      <Text>Search Screen</Text>
-    </View>
+    <ThemedView style={styles.container}>
+      <Text variant="headlineSmall">Search Screen</Text>
+    </ThemedView>
   );
 };
 

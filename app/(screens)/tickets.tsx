@@ -1,11 +1,13 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
+import { ThemedView } from "@/components/ThemedView";
+import { Text } from "react-native-paper";
 
 const TicketsScreen: React.FC = () => {
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       <Text>Ticket Management Screen</Text>
-    </View>
+    </ThemedView>
   );
 };
 
