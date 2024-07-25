@@ -10,6 +10,7 @@ import { IEvent } from '@/types/event';
 import { getUserNotificationsRegistration, registerUserForEventNotification, unregisterUserFromEventNotification } from '@/api/notification';
 import { INotification } from '@/types/notification';
 import { useAuth } from '@/hooks/useAuth';
+import { RefreshControl } from 'react-native-gesture-handler';
 
 type HomeScreenProps = {
     navigation: StackNavigationProp<HomePageStackParamList>;
@@ -70,7 +71,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 data={events}
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => {
-                    const isUserRegistered = notifications.some(notification => notification.userId === user?._id);
+                    const isUserRegistered = notifications.some(notification => notification.eventId == item._id);
                     return (
                         <Card
                             event={item}
