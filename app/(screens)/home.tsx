@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, Alert, StyleSheet } from 'react-native';
 import { HomePageStackParamList } from "@/components/navigation/HomePageNavigation";
 import { ThemedView } from "@/components/ThemedView";
-import useUser from "@/hooks/useUser";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Button, Text } from "react-native-paper";
 import Card from '@/components/Card';
@@ -10,19 +9,19 @@ import { getEvents } from '../../api/event';
 import { IEvent } from '@/types/event';
 import { getUserNotificationsRegistration, registerUserForEventNotification, unregisterUserFromEventNotification } from '@/api/notification';
 import { INotification } from '@/types/notification';
+import { useAuth } from '@/hooks/useAuth';
 
 type HomeScreenProps = {
     navigation: StackNavigationProp<HomePageStackParamList>;
 };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
-    const { user, logoutUser } = useUser();
+    const { user, handleLogout } = useAuth();
     const [notifications, setNotifications] = useState<INotification[]>([]);
-    console.log(notifications)
     const [events, setEvents] = useState<IEvent[]>([]);
 
     useEffect(() => {
-        if(user){
+        if (user) {
             Promise.all([fetchEvents(), fetchUserNotificationData()]);
         }
     }, [user]);
@@ -82,7 +81,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     );
                 }}
             />
-            <Button onPress={logoutUser}>LogOut</Button>
+            <Button onPress={handleLogout}>LogOut</Button>
         </ThemedView>
     );
 };
