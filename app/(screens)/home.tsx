@@ -10,7 +10,7 @@ import { IEvent } from '@/types/event';
 import { getUserNotificationsRegistration, registerUserForEventNotification, unregisterUserFromEventNotification } from '@/api/notification';
 import { INotification } from '@/types/notification';
 import { useAuth } from '@/hooks/useAuth';
-import { RefreshControl } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, RefreshControl } from 'react-native-gesture-handler';
 
 type HomeScreenProps = {
     navigation: StackNavigationProp<HomePageStackParamList>;
@@ -20,6 +20,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     const { user, handleLogout } = useAuth();
     const [notifications, setNotifications] = useState<INotification[]>([]);
     const [events, setEvents] = useState<IEvent[]>([]);
+    const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
         if (user) {
@@ -29,11 +30,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
     const fetchEvents = async () => {
         try {
+            setIsLoading(true)
             const fetchedEvents = await getEvents();
             setEvents(fetchedEvents);
         } catch (error) {
             console.error('Error fetching events:', error);
             Alert.alert('Error', 'Failed to fetch events. Please try again.');
+        }
+        finally {
+            setIsLoading(false)
         }
     };
 
@@ -67,21 +72,37 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <ThemedView style={styles.container}>
             <Text style={styles.title}>TicketMate</Text>
             <Text>Hello, {user?.firstName}</Text>
-            <FlatList
-                data={events}
-                keyExtractor={(item) => item._id}
-                renderItem={({ item }) => {
-                    const isUserRegistered = notifications.some(notification => notification.eventId == item._id);
-                    return (
-                        <Card
-                            event={item}
-                            isUserRegister={isUserRegistered}
-                            onRegisterPress={() => handleRegisterNotification(item._id, !isUserRegistered)}
-                            onBuyTicket={() => handleBuyTicket(item._id)}
-                        />
-                    );
-                }}
-            />
+            <GestureHandlerRootView style={{ flex: 1 }}>
+
+                <FlatList
+                    data={events}
+                    keyExtractor={(item) => item._id}
+                    refreshControl={
+                        <RefreshControl refreshing={isLoading} onRefresh={fetchEvents} />
+                    }
+                    getItemLayout={(data, index) => ({
+                        length: 20,
+                        offset: 20 * index,
+                        index,
+                    })}
+                    renderItem={({ item }) => {
+                        const isUserRegistered = notifications.some(
+                            (notification) => notification.eventId === item._id
+                        );
+                        return (
+                            <Card
+                                event={item}
+                                isUserRegister={isUserRegistered}
+                                onRegisterPress={() =>
+                                    handleRegisterNotification(item._id, !isUserRegistered)
+                                }
+                                onBuyTicket={() => handleBuyTicket(item._id)}
+                            />
+                        );
+                    }}
+                />
+            </GestureHandlerRootView>
+
             <Button onPress={handleLogout}>LogOut</Button>
         </ThemedView>
     );
@@ -91,8 +112,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 100,
-        paddingLeft:20,
-        paddingRight:20,
+        paddingLeft: 20,
+        paddingRight: 20,
         backgroundColor: 'black',
     },
     title: {
