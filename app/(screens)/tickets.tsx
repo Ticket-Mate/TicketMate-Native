@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-const UserScreen: React.FC = () => {
+const TicketsScreen: React.FC = () => {
   return (
     <View style={styles.container}>
-      <Text>User Screen</Text>
+      <Text>Ticket Management Screen</Text>
     </View>
   );
 };
@@ -17,4 +17,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UserScreen;
+export default TicketsScreen;

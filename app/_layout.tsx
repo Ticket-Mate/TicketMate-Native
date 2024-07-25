@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "react-native-reanimated";
 import { theme } from "@/constants/theme";
 import { PaperProvider } from "react-native-paper";
@@ -13,7 +13,7 @@ export default function RootLayout() {
   return (
     <PaperProvider theme={theme}>
       <NavigationContainer independent={true}>
-        {user ? <BottomTabNavigator /> : <HomePageNavigation />}
+      {user ? <BottomTabNavigator /> : <HomePageNavigation />}
       </NavigationContainer>
     </PaperProvider>
   );

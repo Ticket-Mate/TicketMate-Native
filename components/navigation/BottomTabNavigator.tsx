@@ -3,9 +3,9 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { IconButton } from "react-native-paper";
 import HomeScreen from "@/app/(screens)/home";
-import SearchScreen from "@/app/(screens)/SearchScreen";
-import TicketManagerScreen from "@/app/(screens)/TicketManagementScreen";
-import UserScreen from "@/app/(screens)/UserScreen";
+import SearchScreen from "@/app/(screens)/search";
+import TicketsScreen from "@/app/(screens)/tickets";
+import ProfileScreen from "@/app/(screens)/profile";
 
 const Tab = createBottomTabNavigator();
 
@@ -40,7 +40,7 @@ const BottomTabNavigator = () => {
       />
       <Tab.Screen
         name="Tickets"
-        component={TicketManagerScreen}
+        component={TicketsScreen}
         options={{
           tabBarIcon: ({ color }) => (
             <IconButton icon="ticket" size={24} iconColor={color} />
@@ -48,8 +48,8 @@ const BottomTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="User"
-        component={UserScreen}
+        name="Profile"
+        component={ProfileScreen}
         options={{
           tabBarIcon: ({ color }) => (
             <IconButton icon="account" size={24} iconColor={color} />

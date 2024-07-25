@@ -1,4 +1,3 @@
-// components/Card.tsx
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -6,11 +5,12 @@ import { IEvent, EventStatus } from '../types/event';
 
 interface CardProps {
   event: IEvent;
-  onBellPress: () => void;
+  isUserRegister: boolean;
+  onRegisterPress: () => void;
   onBuyTicket: () => void;
 }
 
-const Card: React.FC<CardProps> = ({ event, onBellPress, onBuyTicket }) => {
+const Card: React.FC<CardProps> = ({ event, isUserRegister, onRegisterPress, onBuyTicket }) => {
   const isSoldOut = event.status === EventStatus.SOLD_OUT;
   const isOnSale = event.status === EventStatus.ON_SALE;
 
@@ -24,8 +24,8 @@ const Card: React.FC<CardProps> = ({ event, onBellPress, onBuyTicket }) => {
         <View style={styles.headerContainer}>
           <Text style={styles.name}>{event.name}</Text>
           {isSoldOut && (
-            <TouchableOpacity onPress={onBellPress} style={styles.bellIcon}>
-              <Icon name="bell" size={24} color="#666" />
+            <TouchableOpacity onPress={onRegisterPress} style={styles.bellIcon}>
+              <Icon name="bell" size={24} color={isUserRegister ? '#e358e8' : '#666'} />
             </TouchableOpacity>
           )}
         </View>
