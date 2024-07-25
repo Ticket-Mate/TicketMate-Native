@@ -6,12 +6,11 @@ import { ThemedView } from "@/components/ThemedView";
 import { StackNavigationProp } from "@react-navigation/stack";
 import NavigationLink from "@/components/navigation/NavigationLink";
 import { HomePageStackParamList } from "@/components/navigation/HomePageNavigation";
-import useLogin from "@/hooks/useLogin";
 import { FormProvider, useForm } from "react-hook-form";
 
 import FormInput from "@/components/FormInput";
 import { LoginData } from "@/types/auth";
-import useUser from "@/hooks/useUser";
+import { useAuth } from "@/hooks/useAuth";
 
 type LoginScreenProps = {
   navigation: StackNavigationProp<HomePageStackParamList>;
@@ -20,15 +19,14 @@ type LoginScreenProps = {
 
 const LoginScreen: FC<LoginScreenProps> = ({ navigation }) => {
   const methods = useForm<LoginData>();
+  const { user, loginStatus, handleLogin } = useAuth()
+  const { isLoading, isError, isSuccess } = loginStatus;
 
-  const { handleLogin, isLoading, isError } = useLogin({navigation});
-  const {user} = useUser();
-
-  useEffect(()=>{
-    if(user) {
+  useEffect(() => {
+    if (user) {
       navigation.navigate("Home" as any)
     }
-  },[user])
+  }, [user])
 
   return (
     <FormProvider {...methods}>

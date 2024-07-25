@@ -8,8 +8,8 @@ import Header from "@/components/Header";
 import FormInput from "@/components/FormInput";
 import NavigationLink from "@/components/navigation/NavigationLink";
 import { HomePageStackParamList } from "@/components/navigation/HomePageNavigation";
-import useSignUp from "@/hooks/useSignUp";
 import { SignupData } from "@/types/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 type SignUpScreenProps = {
   navigation: StackNavigationProp<HomePageStackParamList>;
@@ -17,7 +17,8 @@ type SignUpScreenProps = {
 
 const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
   const methods = useForm<SignupData>();
-  const { createUser, isLoading, isSuccess } = useSignUp();
+  const { handleSignup, signupStatus } = useAuth();
+  const {isLoading, isSuccess } = signupStatus;
 
   useEffect(() => {
     if (isSuccess) {
@@ -74,7 +75,7 @@ const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
             icon="send"
             mode="contained"
             onPress={methods.handleSubmit(async (data: SignupData) =>
-              createUser(data),
+              handleSignup(data),
             )}
           >
             Sign Up
