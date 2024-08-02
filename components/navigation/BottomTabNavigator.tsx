@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { IconButton } from "react-native-paper";
 import HomeScreen from "@/app/(screens)/home";
 import SearchScreen from "@/app/(screens)/search";
-import TicketsScreen from "@/app/(screens)/tickets";
+import TicketsScreen from "@/app/(screens)/myEvents";
 import ProfileScreen from "@/app/(screens)/profile";
 
 const Tab = createBottomTabNavigator();

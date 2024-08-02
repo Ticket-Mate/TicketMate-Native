@@ -1,18 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { IEvent, EventStatus } from '../types/event';
+import { calculateTimer } from '../utils/timer';
 
 interface CardProps {
   event: IEvent;
   isUserRegister: boolean;
-  onRegisterPress: () => void;
-  onBuyTicket: () => void;
+  onRegisterPress?: () => void;
+  onBuyTicket?: () => void;
+  ticketCount?: number;
+  showCountdown?: boolean;
+  showTicketCount?: boolean;
+  showBuyButton?: boolean;
+  showBellIcon?: boolean;
 }
 
-const Card: React.FC<CardProps> = ({ event, isUserRegister, onRegisterPress, onBuyTicket }) => {
-  const isSoldOut = event.status === EventStatus.SOLD_OUT;
-  const isOnSale = event.status === EventStatus.ON_SALE;
+const Card: React.FC<CardProps> = ({ 
+  event, 
+  isUserRegister, 
+  onRegisterPress, 
+  onBuyTicket, 
+  ticketCount, 
+  showCountdown = false, 
+  showTicketCount = false,
+  showBuyButton = true,
+  showBellIcon = true,
+}) => {
+  const [timeLeft, setTimeLeft] = useState<string>('');
+
+  useEffect(() => {
+    if (showCountdown) {
+      const interval = setInterval(() => {
+        setTimeLeft(calculateTimer(event.startDate));
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [showCountdown, event.startDate]);
 
   return (
     <View style={styles.card}>
@@ -23,7 +48,7 @@ const Card: React.FC<CardProps> = ({ event, isUserRegister, onRegisterPress, onB
       <View style={styles.contentContainer}>
         <View style={styles.headerContainer}>
           <Text style={styles.name}>{event.name}</Text>
-          {isSoldOut && (
+          {showBellIcon && event.status === EventStatus.SOLD_OUT && (
             <TouchableOpacity onPress={onRegisterPress} style={styles.bellIcon}>
               <Icon name="bell" size={24} color={isUserRegister ? '#e358e8' : '#666'} />
             </TouchableOpacity>
@@ -31,10 +56,21 @@ const Card: React.FC<CardProps> = ({ event, isUserRegister, onRegisterPress, onB
         </View>
         <Text style={styles.description}>{event.description || 'Description not specified'}</Text>
         <Text style={styles.date}>{new Date(event.startDate).toLocaleDateString()}</Text>
-        {isSoldOut && (
-          <Text style={styles.soldOutText}>Sold out</Text>
+        {(showCountdown || showTicketCount) && (
+          <View style={styles.buttonContainer}>
+            {showCountdown && (
+              <TouchableOpacity style={styles.timeButton}>
+                <Text style={styles.timeButtonText}>{timeLeft}</Text>
+              </TouchableOpacity>
+            )}
+            {showTicketCount && ticketCount !== undefined && (
+              <TouchableOpacity style={styles.ticketButton}>
+                <Text style={styles.ticketButtonText}>{`${ticketCount} tickets`}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         )}
-        {isOnSale && (
+        {showBuyButton && event.status === EventStatus.ON_SALE && (
           <TouchableOpacity style={styles.buyButton} onPress={onBuyTicket}>
             <Text style={styles.buyButtonText}>Buy ticket</Text>
           </TouchableOpacity>
@@ -82,10 +118,30 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#666',
   },
-  soldOutText: {
-    color: '#FF3B30',
+  buttonContainer: {
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  timeButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  timeButtonText: {
+    color: '#fff',
     fontWeight: 'bold',
-    marginTop: 4,
+  },
+  ticketButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+  },
+  ticketButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   bellIcon: {
     padding: 4,
