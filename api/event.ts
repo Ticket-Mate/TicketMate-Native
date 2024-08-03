@@ -10,3 +10,4 @@ export const getEvents = async (): Promise<IEvent[]> => {
     throw error;
   }
 };
+
