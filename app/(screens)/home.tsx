@@ -103,6 +103,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 />
             </GestureHandlerRootView>
 
+            <Button onPress={() => {
+                navigation.navigate('Event', { eventId: '123' });
+
+            }}>Go To Event Id 1</Button>
+
             <Button onPress={handleLogout}>LogOut</Button>
         </ThemedView>
     );
