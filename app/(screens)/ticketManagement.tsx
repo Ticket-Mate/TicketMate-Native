@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
-import { getEventsByUserId, getTicketCountByEventId } from "../../api/ticket";
+import { getTicketCountByEventId } from "../../api/ticket";
+import { getEventsByUserId } from "../../api/event";
 import Card from "@/components/Card";
 import { IEvent } from "@/types/event";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,12 +40,21 @@ const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
     try {
       setIsLoading(true);
       const fetchedEvents = await getEventsByUserId(userId);
-      const eventsWithTicketCount = await Promise.all(
-        fetchedEvents.map(async (event) => {
+
+      // Aggregate events by unique ID and sum up ticket counts
+      const eventMap: { [key: string]: IEventWithTicketCount } = {};
+
+      for (const event of fetchedEvents) {
+        if (!eventMap[event._id]) {
           const ticketCount = await getTicketCountByEventId(userId, event._id);
-          return { ...event, ticketCount };
-        })
-      );
+          eventMap[event._id] = { ...event, ticketCount };
+        } else {
+          const ticketCount = await getTicketCountByEventId(userId, event._id);
+          eventMap[event._id].ticketCount = ticketCount;
+        }
+      }
+
+      const eventsWithTicketCount = Object.values(eventMap);
       setEvents(eventsWithTicketCount);
     } catch (error) {
       console.error("Error fetching events by user ID:", error);
