@@ -31,12 +31,12 @@ const Ticket: FC<TicketProps> = ({ ticket, onSelect, selected }) => {
         </View>
           <View style={styles.separatorLine} />
         <View style={styles.ticketPrices}>
-          <View style={styles.ticketSeat}>
+          <View style={styles.ticketOriginalPrice}>
             <Text style={styles.priceText}>Original Price</Text>
             <Text style={styles.infoText}>${ticket.originalPrice}</Text>
           </View>
           <View style={styles.ticketPrices}>
-          <View style={styles.ticketSeat}>
+          <View style={styles.ticketCurrentPrice}>
             <Text style={styles.priceText}>Current Price</Text>
             <Text style={styles.infoText}>${ticket.resalePrice}</Text>
           </View>
@@ -103,9 +103,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     flex: 1,
-    paddingLeft: 10,
   },
   ticketSeat: {
+    alignItems: "center",
+    paddingLeft: 10,
+  },
+  ticketOriginalPrice: {
+    alignItems: "center",
+    paddingRight: 10,
+  },
+  ticketCurrentPrice: {
     alignItems: "center",
     paddingLeft: 10,
   },
