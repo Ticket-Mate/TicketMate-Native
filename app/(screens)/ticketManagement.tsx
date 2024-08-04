@@ -1,19 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, FlatList, View, Text } from "react-native";
+import {
+  StyleSheet,
+  FlatList,
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { getEventsByUserId, getTicketCountByEventId } from "../../api/ticket";
 import Card from "@/components/Card";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { IEvent } from "@/types/event";
 import { useAuth } from "@/hooks/useAuth";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { TicketManagementStackParamList } from "@/components/navigation/TicketManagmentNavigation";
 
 interface IEventWithTicketCount extends IEvent {
   ticketCount: number;
 }
 
-const TicketsScreen: React.FC = () => {
+type TicketManagmentScreenProps = {
+  navigation: StackNavigationProp<TicketManagementStackParamList>;
+};
+
+const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
+  navigation,
+}) => {
   const [events, setEvents] = useState<IEventWithTicketCount[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user } = useAuth();
 
@@ -41,17 +53,24 @@ const TicketsScreen: React.FC = () => {
     }
   };
 
+  const handleEventPress = (event: IEventWithTicketCount) => {
+    console.log(event._id);
+    navigation.navigate("userTicketsDetails", { eventId: event._id });
+  };
+
   const renderEvent = ({ item }: { item: IEventWithTicketCount }) => (
-    <Card
-      event={item}
-      isUserRegister={false}
-      onRegisterPress={() => {}}
-      ticketCount={item.ticketCount}
-      showCountdown={true}
-      showTicketCount={true}
-      showBuyButton={false}
-      showBellIcon={false}
-    />
+    <TouchableOpacity onPress={() => handleEventPress(item)}>
+      <Card
+        event={item}
+        isUserRegister={false}
+        onRegisterPress={() => {}}
+        ticketCount={item.ticketCount}
+        showCountdown={true}
+        showTicketCount={true}
+        showBuyButton={false}
+        showBellIcon={false}
+      />
+    </TouchableOpacity>
   );
 
   return (
@@ -65,7 +84,7 @@ const TicketsScreen: React.FC = () => {
         renderItem={renderEvent}
         ListEmptyComponent={<Text>No tickets available.</Text>}
         refreshing={isLoading}
-        onRefresh={() => userId && fetchEventsByUserId(userId)}
+        onRefresh={() => user && fetchEventsByUserId(user._id)}
       />
     </ThemedView>
   );
@@ -87,4 +106,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TicketsScreen;
+export default TicketManagmentScreen;

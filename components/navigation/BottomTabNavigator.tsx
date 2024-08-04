@@ -4,8 +4,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { IconButton } from "react-native-paper";
 import HomeScreen from "@/app/(screens)/home";
 import SearchScreen from "@/app/(screens)/search";
-import TicketsScreen from "@/app/(screens)/myEvents";
+import TicketManagementScreen from "@/app/(screens)/ticketManagement";
 import ProfileScreen from "@/app/(screens)/profile";
+import TicketManagementNavigation from "./TicketManagmentNavigation";
 
 const Tab = createBottomTabNavigator();
 
@@ -39,8 +40,8 @@ const BottomTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Tickets"
-        component={TicketsScreen}
+        name="TicketManagementPage"
+        component={TicketManagementNavigation}
         options={{
           tabBarIcon: ({ color }) => (
             <IconButton icon="ticket" size={24} iconColor={color} />
