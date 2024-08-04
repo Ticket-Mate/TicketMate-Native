@@ -25,7 +25,7 @@ const BottomTabNavigator = () => {
         component={HomePageNavigation}
         options={{
           tabBarIcon: ({ color }) => (
-            <IconButton icon="microphone" size={24} iconColor={color} />
+            <IconButton icon="home" size={24} iconColor={color} />
           ),
         }}
       />

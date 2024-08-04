@@ -1,36 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, FlatList, View, Text } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
-import { getEventsByUserId } from "../../api/ticket";
+import { getEventsByUserId, getTicketCountByEventId } from "../../api/ticket";
 import Card from "@/components/Card";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { IEvent } from "@/types/event";
+import { useAuth } from "@/hooks/useAuth";
+
+interface IEventWithTicketCount extends IEvent {
+  ticketCount: number;
+}
 
 const TicketsScreen: React.FC = () => {
-  const [events, setEvents] = useState<IEvent[]>([]);
+  const [events, setEvents] = useState<IEventWithTicketCount[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const fetchUserId = async () => {
-      const id = await AsyncStorage.getItem("userId");
-      setUserId(id);
-    };
-
-    fetchUserId();
-  }, []);
-
-  useEffect(() => {
-    if (userId) {
-      fetchEventsByUserId(userId);
+    if (user?._id) {
+      fetchEventsByUserId(user._id);
     }
-  }, [userId]);
+  }, [user?._id]);
 
   const fetchEventsByUserId = async (userId: string) => {
     try {
       setIsLoading(true);
       const fetchedEvents = await getEventsByUserId(userId);
-      setEvents(fetchedEvents);
+      const eventsWithTicketCount = await Promise.all(
+        fetchedEvents.map(async (event) => {
+          const ticketCount = await getTicketCountByEventId(userId, event._id);
+          return { ...event, ticketCount };
+        })
+      );
+      setEvents(eventsWithTicketCount);
     } catch (error) {
       console.error("Error fetching events by user ID:", error);
     } finally {
@@ -38,21 +41,24 @@ const TicketsScreen: React.FC = () => {
     }
   };
 
-  const renderEvent = ({ item }: { item: IEvent }) => (
+  const renderEvent = ({ item }: { item: IEventWithTicketCount }) => (
     <Card
       event={item}
-      isUserRegister={false} // Change as needed
+      isUserRegister={false}
       onRegisterPress={() => {}}
-      ticketCount={item.availableTicket.length} // Assuming you have this data
+      ticketCount={item.ticketCount}
       showCountdown={true}
       showTicketCount={true}
-      showBuyButton={false} // Hide the buy button
-      showBellIcon={false} // Hide the bell icon
+      showBuyButton={false}
+      showBellIcon={false}
     />
   );
 
   return (
     <ThemedView style={styles.container}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerText}>Ticket Management</Text>
+      </View>
       <FlatList
         data={events}
         keyExtractor={(item) => item._id}
@@ -69,6 +75,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+  },
+  headerContainer: {
+    alignItems: "center",
+    marginVertical: 32,
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#ffff",
   },
 });
 
