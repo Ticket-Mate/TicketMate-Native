@@ -63,6 +63,7 @@ const Card: React.FC<CardProps> = ({
         </View>
         <Text style={styles.description}>{event.description || 'Description not specified'}</Text>
         <Text style={styles.date}>{new Date(event.startDate).toLocaleDateString()}</Text>
+        <Text style={styles.date}>{event.location}</Text>
         {isSoldOut && (
           <Text style={styles.soldOutText}>Sold out</Text>
         )}
