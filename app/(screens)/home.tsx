@@ -65,7 +65,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     };
 
     const handleBuyTicket = (eventId: string) => {
-        // TODO: implement this logic
+        navigation.navigate('Event', { eventId: eventId });
     };
 
     return (
@@ -106,6 +106,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     }}
                 />
             </GestureHandlerRootView>
+
 
             <Button onPress={handleLogout}>LogOut</Button>
         </ThemedView>
