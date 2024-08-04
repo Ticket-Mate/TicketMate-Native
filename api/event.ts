@@ -10,3 +10,14 @@ export const getEvents = async (): Promise<IEvent[]> => {
     throw error;
   }
 };
+
+
+export const getEvent = async (eventId: string): Promise<IEvent> => {
+  try {
+    const response = await apiClient.get<IEvent>(`/Event/${eventId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    throw error;
+  }
+}
