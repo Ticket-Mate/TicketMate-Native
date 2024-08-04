@@ -18,4 +18,5 @@ export interface IEvent {
     createdAt: string;
     updatedAt: string;
     availableTicket: string[];
+    location:string;
 }

@@ -30,6 +30,7 @@ const Card: React.FC<CardProps> = ({ event, isUserRegister, onRegisterPress, onB
           )}
         </View>
         <Text style={styles.description}>{event.description || 'Description not specified'}</Text>
+        <Text style={styles.description}>{event.location || 'location not specified'}</Text>
         <Text style={styles.date}>{new Date(event.startDate).toLocaleDateString()}</Text>
         {isSoldOut && (
           <Text style={styles.soldOutText}>Sold out</Text>
