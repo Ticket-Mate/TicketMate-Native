@@ -3,7 +3,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { IconButton } from "react-native-paper";
 import SearchScreen from "@/app/(screens)/search";
-import TicketsScreen from "@/app/(screens)/tickets";
+import TicketsScreen from "@/app/(screens)/myEvents";
 import ProfileScreen from "@/app/(screens)/profile";
 import HomePageNavigation from "./HomePageNavigation";
 
@@ -25,7 +25,7 @@ const BottomTabNavigator = () => {
         component={HomePageNavigation}
         options={{
           tabBarIcon: ({ color }) => (
-            <IconButton icon="microphone" size={24} iconColor={color} />
+            <IconButton icon="home" size={24} iconColor={color} />
           ),
         }}
       />
