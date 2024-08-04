@@ -1,3 +1,5 @@
+import { ITicket } from './ticket';
+
 export enum EventStatus {
     SOLD_OUT = 'sold out',
     ON_SALE = 'on sale',
@@ -17,5 +19,5 @@ export interface IEvent {
     endDate: string;
     createdAt: string;
     updatedAt: string;
-    availableTicket: string[];
+    availableTicket: ITicket[];
 }
