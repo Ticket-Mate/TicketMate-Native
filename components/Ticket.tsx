@@ -1,5 +1,3 @@
-// ticket.tsx
-
 import React, { FC } from "react";
 import { View, StyleSheet } from "react-native";
 import CheckBox from 'expo-checkbox';
@@ -10,9 +8,10 @@ interface TicketProps {
   ticket: ITicket;
   onSelect: (ticket: ITicket, selected: boolean) => void;
   selected: boolean;
+  includeCheckbox: boolean;
 }
 
-const Ticket: FC<TicketProps> = ({ ticket, onSelect, selected }) => {
+const Ticket: FC<TicketProps> = ({ ticket, onSelect, selected, includeCheckbox }) => {
   return (
     <View style={styles.ticketContainer}>
       <View style={styles.ticketType}>
@@ -29,25 +28,24 @@ const Ticket: FC<TicketProps> = ({ ticket, onSelect, selected }) => {
           <Text style={styles.sectionRowText}>Seat</Text>
           <Text style={styles.infoText}>{ticket.position}</Text>
         </View>
-          <View style={styles.separatorLine} />
+        <View style={styles.separatorLine} />
         <View style={styles.ticketPrices}>
           <View style={styles.ticketOriginalPrice}>
             <Text style={styles.priceText}>Original Price</Text>
             <Text style={styles.infoText}>${ticket.originalPrice}</Text>
           </View>
-          <View style={styles.ticketPrices}>
           <View style={styles.ticketCurrentPrice}>
             <Text style={styles.priceText}>Current Price</Text>
             <Text style={styles.infoText}>${ticket.resalePrice}</Text>
           </View>
-          </View>
         </View>
         <View style={styles.separatorLine} />
-
-        <CheckBox
-          value={selected}
-          onValueChange={(value: boolean) => onSelect(ticket, value)}
-        />
+        {includeCheckbox && (
+          <CheckBox
+            value={selected}
+            onValueChange={(value: boolean) => onSelect(ticket, value)}
+          />
+        )}
       </View>
     </View>
   );

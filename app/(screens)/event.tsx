@@ -32,6 +32,7 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
   const [cardNumber, setCardNumber] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const [cvv, setCvv] = useState("");
+  const [includeCheckbox, setIncludeCheckbox] = useState(true);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -128,6 +129,7 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
               ticket={ticket}
               onSelect={handleSelectTicket}
               selected={selectedTickets.includes(ticket)}
+              includeCheckbox={includeCheckbox}
             />
           ))}
         </ScrollView>
