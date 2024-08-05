@@ -1,13 +1,18 @@
 import React, { FC, useEffect, useState } from "react";
-import { View, Image, StyleSheet, ScrollView } from "react-native";
-import { Text, Button, IconButton } from "react-native-paper";
+import { View, Image, StyleSheet, ScrollView, Button, Alert, ActivityIndicator } from "react-native";
+import { Text } from "react-native-paper";
+import Dialog from "react-native-dialog";
+import CheckBox from 'expo-checkbox';
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { HomePageStackParamList } from "@/components/navigation/HomePageNavigation";
 import { ThemedView } from "@/components/ThemedView";
 import { getEventById } from "@/api/event";
 import { IEvent } from "../../types/event";
+import { useAuth } from "@/hooks/useAuth";
 import { ITicket } from "../../types/ticket";
+import { purchaseTickets } from "@/api/ticket"; // Import the new API request
+import Ticket from "../../components/Ticket";
 
 type EventScreenRouteProp = RouteProp<HomePageStackParamList, "Event">;
 
@@ -18,8 +23,16 @@ type EventScreenProps = {
 
 const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
   const { eventId } = route.params;
+  const { user } = useAuth();
   const [event, setEvent] = useState<IEvent | null>(null);
-  const [ticketCount, setTicketCount] = useState(1);
+  const [selectedTickets, setSelectedTickets] = useState<ITicket[]>([]);
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [includeCheckbox, setIncludeCheckbox] = useState(true);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -30,53 +43,143 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
     fetchEvent();
   }, [eventId]);
 
+  const handleSelectTicket = (ticket: ITicket, selected: boolean) => {
+    setSelectedTickets((prevSelected) => {
+      if (selected) {
+        return [...prevSelected, ticket];
+      } else {
+        return prevSelected.filter((t) => t._id !== ticket._id);
+      }
+    });
+  };
+
+  const handleBuyTickets = () => {
+    setDialogVisible(true);
+  };
+
+  const handlePayment = async () => {
+    let missingFields = [];
+    if (!cardName) missingFields.push("Card name");
+    if (!cardNumber) missingFields.push("Card number");
+    if (!expiryDate) missingFields.push("Expiry date");
+    if (!cvv) missingFields.push("CVV");
+    if (!agreeToTerms) missingFields.push("Agreement to Terms and Conditions");
+  
+    if (missingFields.length > 0) {
+      Alert.alert("Missing Information", `Please fill out the following fields: ${missingFields.join(", ")}`);
+      return;
+    }
+  
+    if (!user || !user._id) {
+      Alert.alert("User not authenticated", "Please log in to complete the purchase.");
+      return;
+    }
+  
+    try {
+      await purchaseTickets(user._id, selectedTickets.map(ticket => ticket._id));
+      Alert.alert("Payment Successful", `You have paid for ${selectedTickets.length} tickets.`, [
+        { text: "OK", onPress: () => {
+            setDialogVisible(false);
+            navigation.replace("Event", { eventId }); // Reload the event page
+          }
+        }
+      ]);
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Payment Failed", error.message);
+      } else {
+        Alert.alert("Payment Failed", "An unknown error occurred.");
+      }
+    }
+  };
+
+  const totalPrice = selectedTickets.reduce((sum, ticket) => sum + (ticket.resalePrice ?? ticket.originalPrice), 0);
+
   if (!event) {
     return (
-      <ThemedView>
-        <Text>Loading...</Text>
+      <ThemedView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#ffffff" />
+        <Text style={styles.loadingText}>Loading...</Text>
       </ThemedView>
     );
   }
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View style={styles.headerContainer}>
-          <Image
-            source={{ uri: event.images[0].url }}
-            style={styles.eventImage}
-          />
-          <View style={styles.eventDetailsContainer}>
-            <Text style={styles.eventName}>{event.name}</Text>
-            <Text style={styles.eventLocation}>
-              Palau Sant Jordi, Barcelona
-            </Text>
-            <Text style={styles.eventDate}>
-              {new Date(event.startDate).toLocaleDateString()}
-            </Text>
-          </View>
+      <View style={styles.headerContainer}>
+        <Image
+          source={{ uri: event.images[0].url }}
+          style={styles.eventImage}
+        />
+        <View style={styles.eventDetailsContainer}>
+          <Text style={styles.eventName}>{event.name}</Text>
+          <Text style={styles.eventLocation}>
+            Palau Sant Jordi, Barcelona
+          </Text>
+          <Text style={styles.eventDate}>
+            {new Date(event.startDate).toLocaleDateString()}
+          </Text>
         </View>
-        <View style={styles.ticketCountContainer}>
-          <IconButton
-            icon="minus"
-            onPress={() => setTicketCount(Math.max(1, ticketCount - 1))}
+      </View>
+      <View style={styles.ticketsContainer}>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          {(event.availableTicket as ITicket[]).map((ticket, index) => (
+            <Ticket
+              key={index}
+              ticket={ticket}
+              onSelect={handleSelectTicket}
+              selected={selectedTickets.includes(ticket)}
+              includeCheckbox={includeCheckbox}
+            />
+          ))}
+        </ScrollView>
+      </View>
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>
+          Selected Tickets: {selectedTickets.length}
+        </Text>
+        <Button
+          title="Buy Tickets"
+          onPress={handleBuyTickets}
+        />
+      </View>
+      <Dialog.Container visible={dialogVisible}>
+        <Dialog.Title>Payment</Dialog.Title>
+        <Dialog.Description>
+          You are about to pay for {selectedTickets.length} tickets. The total amount is ${totalPrice}.
+        </Dialog.Description>
+        <Dialog.Input
+          placeholder="Card name"
+          value={cardName}
+          onChangeText={setCardName}
+        />
+        <Dialog.Input
+          placeholder="Card number"
+          keyboardType="numeric"
+          value={cardNumber}
+          onChangeText={setCardNumber}
+        />
+        <Dialog.Input
+          placeholder="Expiry date"
+          value={expiryDate}
+          onChangeText={setExpiryDate}
+        />
+        <Dialog.Input
+          placeholder="CVV"
+          keyboardType="numeric"
+          value={cvv}
+          onChangeText={setCvv}
+        />
+        <View style={styles.checkboxContainer}>
+          <CheckBox
+            value={agreeToTerms}
+            onValueChange={setAgreeToTerms}
           />
-          <Text style={styles.ticketCount}>{ticketCount}</Text>
-          <IconButton
-            icon="plus"
-            onPress={() => setTicketCount(ticketCount + 1)}
-          />
+          <Text style={styles.checkboxLabel}>I agree to the Terms and Conditions</Text>
         </View>
-        {event.availableTicket.map((ticket, index) => (
-          <View key={index} style={styles.ticketRow}>
-            <Text style={styles.ticketText}>Row</Text>
-            <Text style={styles.ticketText}>Seat</Text>
-            <Button mode="contained" style={styles.ticketButton}>
-              Buy Now
-            </Button>
-          </View>
-        ))}
-      </ScrollView>
+        <Dialog.Button label="Cancel" onPress={() => setDialogVisible(false)} />
+        <Dialog.Button label="Pay" onPress={handlePayment} />
+      </Dialog.Container>
     </ThemedView>
   );
 };
@@ -86,14 +189,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000",
   },
-  scrollViewContent: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#000",
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 18,
+    color: "#fff",
+  },
+  scrollViewContent: {
     padding: 16,
   },
   headerContainer: {
+    marginTop: 16,
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
+    paddingHorizontal: 16,
   },
   eventImage: {
     width: 115,
@@ -109,14 +224,12 @@ const styles = StyleSheet.create({
   },
   eventName: {
     fontSize: 32,
-    fontFamily: "work-sans",
     color: "#fff",
     marginBottom: 12,
     textAlign: "center",
   },
   eventLocation: {
     fontSize: 16,
-    fontFamily: "work-sans",
     color: "#EBEBF5",
     opacity: 0.6,
     marginBottom: 1,
@@ -124,34 +237,34 @@ const styles = StyleSheet.create({
   },
   eventDate: {
     fontSize: 16,
-    fontFamily: "work-sans",
     color: "#EBEBF5",
     opacity: 0.6,
     textAlign: "center",
   },
-  ticketCountContainer: {
-    flexDirection: "row",
+  ticketsContainer: {
+    flex: 1,
+    width: "100%",
+    maxHeight: "70%", // Shorten the ticket scrollable section
+  },
+  footer: {
+    padding: 16,
     alignItems: "center",
-    marginBottom: 16,
+    justifyContent: "center",
+    backgroundColor: "#1a1a1a",
   },
-  ticketCount: {
-    fontSize: 18,
+  footerText: {
     color: "#fff",
-    marginHorizontal: 8,
+    fontSize: 18,
+    marginBottom: 8,
   },
-  ticketRow: {
+  checkboxContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 8,
   },
-  ticketText: {
-    fontSize: 16,
-    color: "#fff",
-    marginRight: 8,
-  },
-  ticketButton: {
+  checkboxLabel: {
     marginLeft: 8,
-    backgroundColor: "#7c4dff",
+    color: "black",
   },
 });
 
