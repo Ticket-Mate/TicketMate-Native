@@ -10,11 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
-import {
-  getTicketsByUserAndEventId,
-  updateEventAvailableTickets,
-  removeEventAvailableTickets,
-} from "../../api/ticket";
+import { getTicketsByUserAndEventId, updateTicketPrice, removeTicketFromSale } from "../../api/ticket";
 import { getEventById } from "../../api/event";
 import { IEvent } from "@/types/event";
 import { ITicket } from "@/types/ticket";
@@ -75,18 +71,17 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
 
   const handleUploadForSale = (ticket: ITicket, label: string) => {
     if (label.includes("On Sale")) {
-      handleOnSale(ticket);
+      handleRemoveFromSale(ticket);
     } else {
       setSelectedTicket(ticket);
       setModalVisible(true);
     }
   };
 
-  const handleOnSale = async (ticket: ITicket) => {
-    // Logic for handling "On Sale" status
-    // Call your API to remove the ticket from the event's available ticket list
+  const handleRemoveFromSale = async (ticket: ITicket) => {
+    // Logic for removing from sale
     try {
-      await removeEventAvailableTickets(ticket._id);
+      await removeTicketFromSale(ticket._id);
       Alert.alert("Success", "Ticket has been removed from sale.");
       // Optionally refresh the tickets list
       if (user) {
@@ -94,17 +89,16 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
         setTickets(ticketsList);
       }
     } catch (error) {
-      console.error("Error updating ticket status:", error);
-      Alert.alert("Error", "Failed to update ticket status.");
+      console.error("Error removing ticket from sale:", error);
+      Alert.alert("Error", "Failed to remove ticket from sale.");
     }
   };
 
   const handleUpload = async () => {
     if (!selectedTicket) return;
     // Logic for handling "Upload for Sale"
-    // Call your API to add the ticket to the event's available ticket list
     try {
-      await updateEventAvailableTickets(selectedTicket._id, price);
+      const updatedTicket = await updateTicketPrice(selectedTicket._id, price);
       setModalVisible(false);
       Alert.alert("Success", "Ticket has been uploaded for sale.");
       // Optionally refresh the tickets list
@@ -120,9 +114,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
 
   const renderTicket = ({ item }: { item: ITicket }) => {
     const timeDifference = calculateTimeDifference(event?.startDate);
-    const saleLabel = item.onSale
-      ? `On Sale: $${item.resalePrice} `
-      : "Upload for Sale";
+    const saleLabel = item.onSale ? `On Sale: $${item.resalePrice}` : "Upload for Sale";
 
     return (
       <View style={styles.ticketCard}>
@@ -198,9 +190,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
         }}
       >
         <View style={styles.modalView}>
-          <Text style={styles.modalText}>
-            At what price would you like to sell the ticket?
-          </Text>
+          <Text style={styles.modalText}>At what price would you like to sell the ticket?</Text>
           <TextInput
             style={styles.input}
             onChangeText={setPrice}
@@ -208,7 +198,10 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
             placeholder="Enter Price"
             keyboardType="numeric"
           />
-          <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+          <TouchableOpacity
+            style={styles.uploadButton}
+            onPress={handleUpload}
+          >
             <Text style={styles.uploadButtonText}>Upload for Sale</Text>
           </TouchableOpacity>
         </View>

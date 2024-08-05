@@ -69,7 +69,7 @@ export const updateEventAvailableTickets = async (
   price: string
 ): Promise<void> => {
   try {
-    await apiClient.post(`ticket/updateEventAvailableTickets`, {
+    await apiClient.post(`/ticket/updateEventAvailableTickets`, {
       ticketId,
       price,
     });
@@ -83,9 +83,28 @@ export const removeEventAvailableTickets = async (
   ticketId: string
 ): Promise<void> => {
   try {
-    await apiClient.post(`ticket/removeEventAvailableTickets`, { ticketId });
+    await apiClient.post(`/ticket/removeEventAvailableTickets`, { ticketId });
   } catch (error) {
     console.error("Error removing event available tickets:", error);
+    throw error;
+  }
+};
+
+export const updateTicketPrice = async (ticketId: string, resalePrice: string): Promise<ITicket> => {
+  try {
+    const response = await apiClient.put<ITicket>(`/ticket/updateTicketPrice/${ticketId}`, { resalePrice, onSale: true });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating ticket price:", error);
+    throw error;
+  }
+};
+
+export const removeTicketFromSale = async (ticketId: string): Promise<void> => {
+  try {
+    await apiClient.put(`/ticket/removeTicketFromSale/${ticketId}`);
+  } catch (error) {
+    console.error("Error removing ticket from sale:", error);
     throw error;
   }
 };
