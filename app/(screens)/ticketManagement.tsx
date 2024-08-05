@@ -85,9 +85,6 @@ const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
 
   return (
     <ThemedView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerText}>Ticket Management</Text>
-      </View>
       <FlatList
         data={events}
         keyExtractor={(item) => item._id}

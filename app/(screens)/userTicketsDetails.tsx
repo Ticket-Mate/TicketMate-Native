@@ -4,7 +4,6 @@ import {
   View,
   Text,
   FlatList,
-  Button,
   TouchableOpacity,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
@@ -69,19 +68,19 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
     return (
       <View style={styles.ticketCard}>
         <Text style={styles.ticketPosition}>Position: {item.position}</Text>
-        <Text style={styles.ticketText}>Resale Price: {item.resalePrice}</Text>
-        <Text style={styles.ticketText}>Barcode: {item.barcode}</Text>
         <View style={styles.buttonContainer}>
-          {item.onSale ? (
-            <Text style={styles.onSaleText}>On Sale: ${item.resalePrice}</Text>
-          ) : (
-            <Button
-              title="Upload for Sale"
-              onPress={() => {
-                /* Handle upload for sale */
-              }}
-            />
-          )}
+          <TouchableOpacity
+            style={styles.saleButton}
+            onPress={() => {
+              // handleUploadForSale(item._id)
+            }}
+          >
+            <Text style={styles.saleButtonText}>
+              {item.onSale
+                ? `On Sale: $${item.resalePrice} `
+                : "Upload for Sale"}
+            </Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.ticketButton,
@@ -128,12 +127,6 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
             }
             refreshing={isLoading}
           />
-          <Button
-            title="Sell Ticket"
-            onPress={() => {
-              /* Navigate to ticket upload screen */
-            }}
-          />
         </>
       ) : (
         <Text style={styles.loadingText}>Loading event details...</Text>
@@ -172,12 +165,25 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   activeButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#508D4E",
+    borderRadius: 20,
   },
   disabledButton: {
-    backgroundColor: "#d3d3d3",
+    backgroundColor: "#636366",
+    borderRadius: 20,
   },
   ticketButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  saleButton: {
+    backgroundColor: "#9B6AAD",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  saleButtonText: {
     color: "#fff",
     fontWeight: "bold",
     textAlign: "center",

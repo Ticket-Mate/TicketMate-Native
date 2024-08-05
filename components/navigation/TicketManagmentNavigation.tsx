@@ -16,7 +16,13 @@ const TicketManagementNavigation = () => {
     <Stack.Navigator
       initialRouteName="TicketManagement"
       screenOptions={{
-        headerShown: false,
+        title: "Ticket Management",
+        headerStyle: {
+          backgroundColor: theme.colors.primary, // Customize header background color
+        },
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
       }}
     >
       <Stack.Screen
@@ -26,7 +32,16 @@ const TicketManagementNavigation = () => {
       <Stack.Screen
         name="userTicketsDetails"
         component={UserTicketsDetailsScreen}
-        options={{ headerShown: true }}
+        options={{
+          headerShown: true,
+          title: "Event Details", // Custom header title
+          headerStyle: {
+            backgroundColor: theme.colors.primary,
+          },
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
       />
     </Stack.Navigator>
   );
