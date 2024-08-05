@@ -5,9 +5,16 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
+  Modal,
+  TextInput,
+  Alert,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
-import { getTicketsByUserAndEventId } from "../../api/ticket";
+import {
+  getTicketsByUserAndEventId,
+  updateEventAvailableTickets,
+  removeEventAvailableTickets,
+} from "../../api/ticket";
 import { getEventById } from "../../api/event";
 import { IEvent } from "@/types/event";
 import { ITicket } from "@/types/ticket";
@@ -17,6 +24,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { TicketManagementStackParamList } from "@/components/navigation/TicketManagmentNavigation";
 import Card from "@/components/Card"; // Ensure this path is correct
+import Ticket from "@/components/Ticket";
 
 type UserTicketsDetailsScreenRouteProps = RouteProp<
   TicketManagementStackParamList,
@@ -37,6 +45,9 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
   const [event, setEvent] = useState<IEvent | null>(null);
   const [tickets, setTickets] = useState<ITicket[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
+  const [price, setPrice] = useState<string>("");
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -62,24 +73,71 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
     fetchEventDetails();
   }, [eventId, user]);
 
+  const handleUploadForSale = (ticket: ITicket, label: string) => {
+    if (label.includes("On Sale")) {
+      handleOnSale(ticket);
+    } else {
+      setSelectedTicket(ticket);
+      setModalVisible(true);
+    }
+  };
+
+  const handleOnSale = async (ticket: ITicket) => {
+    // Logic for handling "On Sale" status
+    // Call your API to remove the ticket from the event's available ticket list
+    try {
+      await removeEventAvailableTickets(ticket._id);
+      Alert.alert("Success", "Ticket has been removed from sale.");
+      // Optionally refresh the tickets list
+      if (user) {
+        const ticketsList = await getTicketsByUserAndEventId(user._id, eventId);
+        setTickets(ticketsList);
+      }
+    } catch (error) {
+      console.error("Error updating ticket status:", error);
+      Alert.alert("Error", "Failed to update ticket status.");
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedTicket) return;
+    // Logic for handling "Upload for Sale"
+    // Call your API to add the ticket to the event's available ticket list
+    try {
+      await updateEventAvailableTickets(selectedTicket._id, price);
+      setModalVisible(false);
+      Alert.alert("Success", "Ticket has been uploaded for sale.");
+      // Optionally refresh the tickets list
+      if (user) {
+        const ticketsList = await getTicketsByUserAndEventId(user._id, eventId);
+        setTickets(ticketsList);
+      }
+    } catch (error) {
+      console.error("Error uploading ticket for sale:", error);
+      Alert.alert("Error", "Failed to upload ticket for sale.");
+    }
+  };
+
   const renderTicket = ({ item }: { item: ITicket }) => {
     const timeDifference = calculateTimeDifference(event?.startDate);
+    const saleLabel = item.onSale
+      ? `On Sale: $${item.resalePrice} `
+      : "Upload for Sale";
 
     return (
       <View style={styles.ticketCard}>
-        <Text style={styles.ticketPosition}>Position: {item.position}</Text>
+        <Ticket
+          ticket={item}
+          onSelect={() => {}}
+          selected={false}
+          includeCheckbox={false}
+        />
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.saleButton}
-            onPress={() => {
-              // handleUploadForSale(item._id)
-            }}
+            onPress={() => handleUploadForSale(item, saleLabel)}
           >
-            <Text style={styles.saleButtonText}>
-              {item.onSale
-                ? `On Sale: $${item.resalePrice} `
-                : "Upload for Sale"}
-            </Text>
+            <Text style={styles.saleButtonText}>{saleLabel}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
@@ -131,6 +189,30 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
       ) : (
         <Text style={styles.loadingText}>Loading event details...</Text>
       )}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalView}>
+          <Text style={styles.modalText}>
+            At what price would you like to sell the ticket?
+          </Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={setPrice}
+            value={price}
+            placeholder="Enter Price"
+            keyboardType="numeric"
+          />
+          <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+            <Text style={styles.uploadButtonText}>Upload for Sale</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </ThemedView>
   );
 };
@@ -149,9 +231,6 @@ const styles = StyleSheet.create({
   },
   ticketPosition: {
     fontWeight: "bold",
-    color: "#FFFFFF",
-  },
-  ticketText: {
     color: "#FFFFFF",
   },
   buttonContainer: {
@@ -197,6 +276,44 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: "#FFFFFF",
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 15,
+    width: "80%",
+    paddingLeft: 10,
+  },
+  uploadButton: {
+    backgroundColor: "#9B6AAD",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  uploadButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 

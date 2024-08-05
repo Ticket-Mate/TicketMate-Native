@@ -64,7 +64,6 @@ const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
   };
 
   const handleEventPress = (event: IEventWithTicketCount) => {
-    console.log(event._id);
     navigation.navigate("userTicketsDetails", { eventId: event._id });
   };
 
