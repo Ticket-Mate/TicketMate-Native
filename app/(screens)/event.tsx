@@ -11,8 +11,10 @@ import { getEventById } from "@/api/event";
 import { IEvent } from "../../types/event";
 import { useAuth } from "@/hooks/useAuth";
 import { ITicket } from "../../types/ticket";
-import { purchaseTickets } from "@/api/ticket"; // Import the new API request
+import { purchaseTickets } from "@/api/ticket";
+import { registerUserForEventNotification, unregisterUserFromEventNotification, getUserNotificationsRegistration } from "@/api/notification";
 import Ticket from "../../components/Ticket";
+import { INotification } from "@/types/notification";
 
 type EventScreenRouteProp = RouteProp<HomePageStackParamList, "Event">;
 
@@ -33,6 +35,8 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
   const [expiryDate, setExpiryDate] = useState("");
   const [cvv, setCvv] = useState("");
   const [includeCheckbox, setIncludeCheckbox] = useState(true);
+  const [notifications, setNotifications] = useState<INotification[]>([]);
+  const [isUserRegistered, setIsUserRegistered] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -40,8 +44,19 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
       setEvent(eventData);
     };
 
+    const fetchUserNotificationData = async () => {
+      try {
+        const data = await getUserNotificationsRegistration(user?._id!);
+        setNotifications(data);
+        setIsUserRegistered(data.some(notification => notification.eventId === eventId));
+      } catch (error) {
+        console.error('Error fetching notification data:', error);
+      }
+    };
+
     fetchEvent();
-  }, [eventId]);
+    fetchUserNotificationData();
+  }, [eventId, user]);
 
   const handleSelectTicket = (ticket: ITicket, selected: boolean) => {
     setSelectedTickets((prevSelected) => {
@@ -93,6 +108,19 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
     }
   };
 
+  const handleRegisterNotification = async (register: boolean) => {
+    try {
+      if (register) {
+        await registerUserForEventNotification(user?._id!, eventId);
+      } else {
+        await unregisterUserFromEventNotification(user?._id!, eventId);
+      }
+      setIsUserRegistered(register);
+    } catch (error) {
+      console.error('Error handling notification:', error);
+    }
+  };
+
   const totalPrice = selectedTickets.reduce((sum, ticket) => sum + (ticket.resalePrice ?? ticket.originalPrice), 0);
 
   if (!event) {
@@ -103,6 +131,8 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
       </ThemedView>
     );
   }
+
+  const availableTickets = event.availableTicket as ITicket[];
 
   return (
     <ThemedView style={styles.container}>
@@ -122,17 +152,27 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
         </View>
       </View>
       <View style={styles.ticketsContainer}>
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          {(event.availableTicket as ITicket[]).map((ticket, index) => (
-            <Ticket
-              key={index}
-              ticket={ticket}
-              onSelect={handleSelectTicket}
-              selected={selectedTickets.includes(ticket)}
-              includeCheckbox={includeCheckbox}
+        {availableTickets.length > 0 ? (
+          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            {availableTickets.map((ticket, index) => (
+              <Ticket
+                key={index}
+                ticket={ticket}
+                onSelect={handleSelectTicket}
+                selected={selectedTickets.includes(ticket)}
+                includeCheckbox={includeCheckbox}
+              />
+            ))}
+          </ScrollView>
+        ) : (
+          <View style={styles.noTicketsContainer}>
+            <Text style={styles.noTicketsText}>No available tickets for this event currently.</Text>
+            <Button
+              title={isUserRegistered ? "Unregister from Notification" : "Register for Notification"}
+              onPress={() => handleRegisterNotification(!isUserRegistered)}
             />
-          ))}
-        </ScrollView>
+          </View>
+        )}
       </View>
       <View style={styles.footer}>
         <Text style={styles.footerText}>
@@ -141,6 +181,7 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
         <Button
           title="Buy Tickets"
           onPress={handleBuyTickets}
+          disabled={selectedTickets.length === 0}
         />
       </View>
       <Dialog.Container visible={dialogVisible}>
@@ -245,6 +286,17 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     maxHeight: "70%", // Shorten the ticket scrollable section
+  },
+  noTicketsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noTicketsText: {
+    color: "#fff",
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 18,
   },
   footer: {
     padding: 16,
