@@ -1,12 +1,10 @@
-// components/navigation/MainTabNavigator.tsx
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { IconButton } from "react-native-paper";
-import SearchScreen from "@/app/(screens)/search";
-import TicketManagementScreen from "@/app/(screens)/ticketManagement";
 import ProfileScreen from "@/app/(screens)/profile";
 import HomePageNavigation from "./HomePageNavigation";
 import TicketManagementNavigation from "./TicketManagmentNavigation";
+import SearchNavigation from "./SearchNavigation";
 
 const Tab = createBottomTabNavigator();
 
@@ -31,8 +29,8 @@ const BottomTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Search"
-        component={SearchScreen}
+        name="SearchPage"
+        component={SearchNavigation}
         options={{
           tabBarIcon: ({ color }) => (
             <IconButton icon="magnify" size={24} iconColor={color} />

@@ -1,22 +1,21 @@
-import TicketManagementScreen from "@/app/(screens)/ticketManagement";
+import SearchScreen from "@/app/(screens)/search";
 import UserTicketsDetailsScreen from "@/app/(screens)/userTicketsDetails";
 import { createStackNavigator } from "@react-navigation/stack";
 import { useTheme } from "react-native-paper";
 
-export type TicketManagementStackParamList = {
-  TicketManagement: typeof TicketManagementScreen;
+export type SearchNavigationStackParamList = {
+  Search: typeof SearchScreen;
   userTicketsDetails: { eventId: string };
 };
 
-const Stack = createStackNavigator<TicketManagementStackParamList>();
-
-const TicketManagementNavigation = () => {
+const Stack = createStackNavigator<SearchNavigationStackParamList>();
+const SearchNavigation = () => {
   const theme = useTheme();
   return (
     <Stack.Navigator
-      initialRouteName="TicketManagement"
+      initialRouteName="Search"
       screenOptions={{
-        title: "Ticket Management",
+        title: "Search Screen",
         headerStyle: {
           backgroundColor: theme.colors.primary,
         },
@@ -26,15 +25,15 @@ const TicketManagementNavigation = () => {
       }}
     >
       <Stack.Screen
-        name="TicketManagement"
-        component={TicketManagementScreen}
+        name="Search"
+        component={SearchScreen}
       />
       <Stack.Screen
         name="userTicketsDetails"
         component={UserTicketsDetailsScreen}
         options={{
           headerShown: true,
-          title: "Event Details", // Custom header title
+          title: "Event Details",
           headerStyle: {
             backgroundColor: theme.colors.primary,
           },
@@ -46,4 +45,4 @@ const TicketManagementNavigation = () => {
     </Stack.Navigator>
   );
 };
-export default TicketManagementNavigation;
+export default SearchNavigation;

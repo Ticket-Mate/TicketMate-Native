@@ -148,7 +148,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                                 }
                                 onBuyTicket={() => handleBuyTicket(item._id)}
                                 showBuyButton={true}
-                                showBellIcon={true}
+                                showBellIcon={isUserRegistered}
                                 showCountdown={false}
                                 showTicketCount={false}
                             />
