@@ -1,12 +1,19 @@
 import React from "react";
 import { ThemedView } from "@/components/ThemedView";
 import { StyleSheet } from "react-native";
-import { Text } from "react-native-paper";
+import { Searchbar } from 'react-native-paper';
 
 const SearchScreen: React.FC = () => {
+  const [searchQuery, setSearchQuery] = React.useState('');
+
   return (
     <ThemedView style={styles.container}>
-      <Text variant="headlineSmall">Search Screen</Text>
+      <Searchbar
+        style={{top: 100, width:'90%'}}
+        placeholder="Search"
+        onChangeText={setSearchQuery}
+        value={searchQuery}
+      />
     </ThemedView>
   );
 };
@@ -14,7 +21,6 @@ const SearchScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
   },
 });
