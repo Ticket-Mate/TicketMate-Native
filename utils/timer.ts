@@ -22,3 +22,15 @@ export const calculateTimer = (startDate: string | Date): string => {
     return `${Math.floor(timeDifference / (1000 * 60 * 60 * 24))} days`;
   }
 };
+
+export const calculateTimeDifference = (
+  startDate: string | undefined
+): number => {
+  if (!startDate) return Number.MAX_SAFE_INTEGER;
+
+  const start = new Date(startDate).getTime();
+  const now = Date.now();
+  const diffInHours = (start - now) / (1000 * 60 * 60);
+
+  return diffInHours;
+};

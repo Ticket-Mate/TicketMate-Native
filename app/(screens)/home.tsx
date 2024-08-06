@@ -86,8 +86,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     };
 
     const handleBuyTicket = (eventId: string) => {
-        // TODO: implement this logic
-        console.log('Buy ticket for event:', eventId);
+        navigation.navigate('Event', { eventId: eventId });
     };
 
     const handleCategorySelect = useCallback((category: string) => {
@@ -158,11 +157,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 </View>
             </ScrollView>
 
+<<<<<<< HEAD
             <View style={styles.logoutButtonContainer}>
                 <Button mode="contained" onPress={handleLogout} style={styles.logoutButton}>
                     Log Out
                 </Button>
             </View>
+=======
+
+            <Button onPress={handleLogout}>LogOut</Button>
+>>>>>>> origin/adding-notifications-to-event-page
         </ThemedView>
     );
 };
