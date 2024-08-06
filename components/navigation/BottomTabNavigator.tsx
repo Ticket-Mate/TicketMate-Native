@@ -1,11 +1,10 @@
-// components/navigation/MainTabNavigator.tsx
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { IconButton } from "react-native-paper";
-import HomeScreen from "@/app/(screens)/home";
-import SearchScreen from "@/app/(screens)/search";
-import TicketsScreen from "@/app/(screens)/myEvents";
 import ProfileScreen from "@/app/(screens)/profile";
+import HomePageNavigation from "./HomePageNavigation";
+import TicketManagementNavigation from "./TicketManagmentNavigation";
+import SearchNavigation from "./SearchNavigation";
 
 const Tab = createBottomTabNavigator();
 
@@ -21,8 +20,8 @@ const BottomTabNavigator = () => {
       }}
     >
       <Tab.Screen
-        name="Home"
-        component={HomeScreen}
+        name="HomePage"
+        component={HomePageNavigation}
         options={{
           tabBarIcon: ({ color }) => (
             <IconButton icon="home" size={24} iconColor={color} />
@@ -30,8 +29,8 @@ const BottomTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Search"
-        component={SearchScreen}
+        name="SearchPage"
+        component={SearchNavigation}
         options={{
           tabBarIcon: ({ color }) => (
             <IconButton icon="magnify" size={24} iconColor={color} />
@@ -39,8 +38,8 @@ const BottomTabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Tickets"
-        component={TicketsScreen}
+        name="TicketManagementPage"
+        component={TicketManagementNavigation}
         options={{
           tabBarIcon: ({ color }) => (
             <IconButton icon="ticket" size={24} iconColor={color} />

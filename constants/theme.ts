@@ -3,6 +3,9 @@ import { MD3DarkTheme as PaperDarkTheme } from "react-native-paper";
 export const theme = {
   ...PaperDarkTheme,
   colors: {
+    elevation: {
+      level3: "#8989895c",
+    },
     primary: "#9B6AAD",
     onPrimary: "#0B0A0A",
     primaryContainer: "#fff",
