@@ -2,11 +2,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IUser, LoginData, SignupData } from '@/types/auth';
 import { login, register } from '@/api/auth'; // Adjust paths as needed
+import { UpdateUser, updateUser } from '@/api/profile';
+import { set } from 'react-hook-form';
 
 export interface AuthContextType {
   user: IUser | null;
   handleLogin: (formData: LoginData) => Promise<void>;
   handleSignup: (formData: SignupData) => Promise<void>;
+  handleUpdateUser: (userId: string, updatedData: UpdateUser) => Promise<void>;
   handleLogout: () => void;
   loginStatus: {
     isLoading: boolean;
@@ -70,13 +73,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const handleUpdateUser = async (userId: string, updatedData: UpdateUser) => {
+    const data = await updateUser(userId, updatedData);
+    await AsyncStorage.setItem('user', JSON.stringify(data));
+    setUser(data);
+  };
+
   const handleLogout = async () => {
     await AsyncStorage.removeItem('user');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, handleLogin, handleSignup, handleLogout, loginStatus, signupStatus }}>
+    <AuthContext.Provider value={{ user, handleLogin, handleSignup, handleLogout, loginStatus, handleUpdateUser, signupStatus }}>
       {children}
     </AuthContext.Provider>
   );
