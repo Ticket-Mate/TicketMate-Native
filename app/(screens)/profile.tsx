@@ -7,11 +7,12 @@ import { getUserNotificationsRegistration } from "@/api/notification";
 import { INotification } from "@/types/notification";
 import { IEvent } from "@/types/event";
 import { getEvents } from '@/api/event';
-import { updateUser } from "@/api/profile";
 import { launchImageLibrary } from 'react-native-image-picker';
+import { getEventsByUserId } from "@/api/ticket";
+import { getInterestsEventsByUser } from "@/api/notification";
 
 const ProfileScreen: React.FC = () => {
-  const { user } = useAuth();
+  const { user, handleUpdateUser } = useAuth();
   const [notifications, setNotifications] = useState<INotification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [events, setEvents] = useState<IEvent[]>([]);
@@ -22,29 +23,21 @@ const ProfileScreen: React.FC = () => {
   const [newEmail, setNewEmail] = useState(user?.email || '');
   const [newPhoto, setNewPhoto] = useState(user?.pictureUrl || '');
   const flatListRef = useRef<FlatList<IEvent>>(null);
+  const [interests, setInterests] = useState<IEvent[]>([]);
 
   useEffect(() => {
     if (user) {
-      Promise.all([fetchEvents(), fetchUserNotificationData()]);
+      console.log('Fetching user data');
+      fetchUserNotificationData();
     }
   }, [user]);
 
-  const fetchEvents = async () => {
-    try {
-      setIsLoading(true);
-      const fetchedEvents = await getEvents();
-      setEvents(fetchedEvents);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      Alert.alert('Error', 'Failed to fetch events. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
   const fetchUserNotificationData = async () => {
     try {
-      const data = await getUserNotificationsRegistration(user?._id!);
-      setNotifications(data);
+      const data = await getInterestsEventsByUser(user?._id!);
+      setInterests(data);
+      console.log('Interests:', data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
@@ -60,12 +53,12 @@ const ProfileScreen: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      await updateUser(user?._id!, {
+      await handleUpdateUser(user?._id!, {
         email: newEmail,
         firstName: newFirstName,
         lastName: newLastName,
-        pictureUrl: newPhoto,
       });
+
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating user info:', error);
@@ -128,13 +121,13 @@ const ProfileScreen: React.FC = () => {
   );
 
   const handleNext = () => {
-    const nextIndex = (currentIndex + 1) % interestedEvents.length;
+    const nextIndex = (currentIndex + 1) % interests.length;
     setCurrentIndex(nextIndex);
     flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
   };
 
   const handlePrev = () => {
-    const prevIndex = (currentIndex - 1 + interestedEvents.length) % interestedEvents.length;
+    const prevIndex = (currentIndex - 1 + interests.length) % interests.length;
     setCurrentIndex(prevIndex);
     flatListRef.current?.scrollToIndex({ index: prevIndex, animated: true });
   };
@@ -188,7 +181,7 @@ const ProfileScreen: React.FC = () => {
             />
             <FlatList
               ref={flatListRef}
-              data={interestedEvents}
+              data={interests}
               renderItem={renderEventItem}
               keyExtractor={item => item._id}
               horizontal

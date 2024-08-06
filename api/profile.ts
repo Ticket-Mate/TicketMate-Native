@@ -1,6 +1,12 @@
 import apiClient from './apiClient';
 
-export const updateUser = async (userId: string, data: any) => {
+export type UpdateUser = {
+    email: string,
+    firstName: string,
+    lastName: string,
+}
+
+export const updateUser = async (userId: string, data: UpdateUser) => {
     try {
         const response = await apiClient.put(`/user/${userId}`, data);
         return response.data;

@@ -1,5 +1,6 @@
 import { INotification } from "@/types/notification";
 import apiClient from "./apiClient";
+import { IEvent } from "@/types/event";
 
 export const registerUserForEventNotification = async (userId: string, eventId: string) => {
     try {
@@ -32,3 +33,13 @@ export const getUserNotificationsRegistration = async (userId: string) => {
         throw new Error('Failed to get user notifications registration');
     }
 };
+
+export const getInterestsEventsByUser = async (userId: string) => {
+    try {
+        const response = await apiClient.get<IEvent[]>(`/notifications/interests/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting interests events by user:', error);
+        throw new Error('Failed to get interests events by user');
+    }
+}
