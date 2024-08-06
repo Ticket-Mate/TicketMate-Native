@@ -10,7 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
-import { getTicketsByUserAndEventId, updateTicketPrice, removeTicketFromSale, updateEventAvailableTickets } from "../../api/ticket";
+import { getTicketsByUserAndEventId, updateTicketPrice, removeTicketFromSale } from "../../api/ticket";
 import { getEventById } from "../../api/event";
 import { IEvent } from "@/types/event";
 import { ITicket } from "@/types/ticket";
@@ -96,13 +96,10 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
 
   const handleUpload = async () => {
     if (!selectedTicket) return;
-    // Logic for handling "Upload for Sale"
     try {
       const updatedTicket = await updateTicketPrice(selectedTicket._id, price);
-      await updateEventAvailableTickets(selectedTicket._id);
       setModalVisible(false);
       Alert.alert("Success", "Ticket has been uploaded for sale.");
-      // Optionally refresh the tickets list
       if (user) {
         const ticketsList = await getTicketsByUserAndEventId(user._id, eventId);
         setTickets(ticketsList);

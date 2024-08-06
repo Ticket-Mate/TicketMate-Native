@@ -64,18 +64,6 @@ export const purchaseTickets = async (
   }
 };
 
-export const updateEventAvailableTickets = async (
-  ticketId: string
-): Promise<void> => {
-  try {
-    await apiClient.post(`/ticket/updateEventAvailableTickets`, {
-      ticketId,
-    });
-  } catch (error) {
-    console.error("Error updating event available tickets:", error);
-    throw error;
-  }
-};
 
 export const removeEventAvailableTickets = async (
   ticketId: string

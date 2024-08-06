@@ -61,16 +61,37 @@ const Card: React.FC<CardProps> = ({
             </TouchableOpacity>
           )}
         </View>
-        <Text style={styles.description}>{event.description || 'Description not specified'}</Text>
-        <Text style={styles.date}>{new Date(event.startDate).toLocaleDateString()}</Text>
-        <Text style={styles.date}>{event.location}</Text>
-        {isSoldOut && (
-          <Text style={styles.soldOutText}>Sold out</Text>
+        <Text style={styles.description}>
+          {event.description || "Description not specified"}
+        </Text>
+        <Text style={styles.date}>
+          {new Date(event.startDate).toLocaleDateString()}
+        </Text>
+        {(showCountdown || showTicketCount) && (
+          <View style={styles.buttonContainer}>
+            {showCountdown && (
+              <TouchableOpacity style={styles.timeButton}>
+                <Text style={styles.timeButtonText}>{timeLeft}</Text>
+              </TouchableOpacity>
+            )}
+            {showTicketCount && ticketCount !== undefined && (
+              <TouchableOpacity style={styles.ticketButton}>
+                <Text style={styles.ticketButtonText}>
+                  {`${ticketCount} tickets`}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         )}
-        {isOnSale && (
-          <TouchableOpacity style={styles.buyButton} onPress={onBuyTicket}>
-            <Text style={styles.buyButtonText}>Buy ticket</Text>
-          </TouchableOpacity>
+        {showBuyButton && (
+          <>
+            {isOnSale && (
+              <TouchableOpacity style={styles.buyButton} onPress={onBuyTicket}>
+                <Text style={styles.buyButtonText}>Find ticket</Text>
+              </TouchableOpacity>
+            )}
+            {isSoldOut && <Text style={styles.soldOutText}>Sold out</Text>}
+          </>
         )}
       </View>
     </View>
