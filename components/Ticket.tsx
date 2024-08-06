@@ -34,10 +34,10 @@ const Ticket: FC<TicketProps> = ({ ticket, onSelect, selected, includeCheckbox }
             <Text style={styles.priceText}>Original Price</Text>
             <Text style={styles.infoText}>${ticket.originalPrice}</Text>
           </View>
-          <View style={styles.ticketCurrentPrice}>
+          {ticket.onSale && <View style={styles.ticketCurrentPrice}>
             <Text style={styles.priceText}>Current Price</Text>
             <Text style={styles.infoText}>${ticket.resalePrice}</Text>
-          </View>
+          </View>}
         </View>
         <View style={styles.separatorLine} />
         {includeCheckbox && (

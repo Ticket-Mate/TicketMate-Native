@@ -112,7 +112,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
 
   const renderTicket = ({ item }: { item: ITicket }) => {
     const timeDifference = calculateTimeDifference(event?.startDate);
-    const saleLabel = item.onSale ? `On Sale: $${item.resalePrice}` : "Upload for Sale";
+    const saleLabel = item.onSale ? `On Sale: $${item.resalePrice ? item.resalePrice : item.originalPrice}` : "Upload for Sale";
 
     return (
       <View style={styles.ticketCard}>

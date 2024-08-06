@@ -20,7 +20,7 @@ type HomeScreenProps = {
 };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
-    const { user, handleLogout } = useAuth();
+    const { user } = useAuth();
     const [notifications, setNotifications] = useState<INotification[]>([]);
     const [allEvents, setAllEvents] = useState<IEvent[]>([]);
     const [filteredEvents, setFilteredEvents] = useState<IEvent[]>([]);
@@ -148,7 +148,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                                 }
                                 onBuyTicket={() => handleBuyTicket(item._id)}
                                 showBuyButton={true}
-                                showBellIcon={isUserRegistered}
                                 showCountdown={false}
                                 showTicketCount={false}
                             />
@@ -156,12 +155,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                     })}
                 </View>
             </ScrollView>
-
-            <View style={styles.logoutButtonContainer}>
-                <Button mode="contained" onPress={handleLogout} style={styles.logoutButton}>
-                    Log Out
-                </Button>
-            </View>
         </ThemedView>
     );
 };
@@ -187,12 +180,6 @@ const styles = StyleSheet.create({
     },
     eventListContainer: {
         paddingHorizontal: 20,
-    },
-    logoutButtonContainer: {
-        padding: 20,
-    },
-    logoutButton: {
-        backgroundColor: 'rgb(155, 106, 173)',
     },
 });
 

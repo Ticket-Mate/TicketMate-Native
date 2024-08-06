@@ -3,19 +3,14 @@ import { Avatar, Card, Text, ActivityIndicator, IconButton, Button, TextInput } 
 import { ThemedView } from "@/components/ThemedView";
 import { StyleSheet, FlatList, View, Alert, TouchableOpacity } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
-import { getUserNotificationsRegistration } from "@/api/notification";
 import { INotification } from "@/types/notification";
 import { IEvent } from "@/types/event";
-import { getEvents } from '@/api/event';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { getEventsByUserId } from "@/api/ticket";
 import { getInterestsEventsByUser } from "@/api/notification";
 
 const ProfileScreen: React.FC = () => {
-  const { user, handleUpdateUser } = useAuth();
-  const [notifications, setNotifications] = useState<INotification[]>([]);
+  const { user, handleUpdateUser, handleLogout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [events, setEvents] = useState<IEvent[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [newFirstName, setNewFirstName] = useState(user?.firstName || '');
@@ -116,10 +111,6 @@ const ProfileScreen: React.FC = () => {
     </Card>
   );
 
-  const interestedEvents = events.filter(event =>
-    notifications.some(notification => notification.eventId === event._id)
-  );
-
   const handleNext = () => {
     const nextIndex = (currentIndex + 1) % interests.length;
     setCurrentIndex(nextIndex);
@@ -206,6 +197,11 @@ const ProfileScreen: React.FC = () => {
           </View>
         )}
       </View>
+      <View style={styles.logoutButtonContainer}>
+        <Button mode="contained" onPress={handleLogout} style={styles.logoutButton}>
+          Log Out
+        </Button>
+      </View>
     </ThemedView>
   );
 };
@@ -265,6 +261,12 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 10,
+  },
+  logoutButtonContainer: {
+    padding: 20,
+  },
+  logoutButton: {
+    backgroundColor: 'rgb(155, 106, 173)',
   },
 });
 
