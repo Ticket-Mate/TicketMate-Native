@@ -11,6 +11,16 @@ export const getEvents = async (): Promise<IEvent[]> => {
   }
 };
 
+export const searchEvents = async (q:string, filter: string): Promise<IEvent[]> => {
+  try {
+    const response = await apiClient.get<IEvent[]>(`/Event?q=${q}&type=${filter}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    throw error;
+  }
+};
+
 export const getEventById = async (id: string): Promise<IEvent> => {
   try {
     const response = await apiClient.get<IEvent>(`/Event/${id}`);
