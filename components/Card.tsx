@@ -1,19 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { IEvent, EventStatus } from "../types/event";
-import { calculateTimer } from "../utils/timer";
 
 interface CardProps {
   event: IEvent;
   isUserRegister: boolean;
   onRegisterPress?: () => void;
   onBuyTicket?: () => void;
-  ticketCount?: number;
-  showCountdown?: boolean;
-  showTicketCount?: boolean;
   showBuyButton?: boolean;
   showBellIcon?: boolean;
+  formatDate: (date: string) => string;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -21,24 +18,10 @@ const Card: React.FC<CardProps> = ({
   isUserRegister,
   onRegisterPress,
   onBuyTicket,
-  ticketCount,
-  showCountdown = false,
-  showTicketCount = false,
   showBuyButton = true,
   showBellIcon = true,
+  formatDate,
 }) => {
-  const [timeLeft, setTimeLeft] = useState<string>("");
-
-  useEffect(() => {
-    if (showCountdown) {
-      const interval = setInterval(() => {
-        setTimeLeft(calculateTimer(event.startDate));
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [showCountdown, event.startDate]);
-
   const isSoldOut = event.status === EventStatus.SOLD_OUT;
   const isOnSale = event.status === EventStatus.ON_SALE;
 
@@ -61,28 +44,9 @@ const Card: React.FC<CardProps> = ({
             </TouchableOpacity>
           )}
         </View>
-        <Text style={styles.description}>
-          {event.description || "Description not specified"}
-        </Text>
-        <Text style={styles.date}>
-          {new Date(event.startDate).toLocaleDateString()}
-        </Text>
-        {(showCountdown || showTicketCount) && (
-          <View style={styles.buttonContainer}>
-            {showCountdown && (
-              <TouchableOpacity style={styles.timeButton}>
-                <Text style={styles.timeButtonText}>{timeLeft}</Text>
-              </TouchableOpacity>
-            )}
-            {showTicketCount && ticketCount !== undefined && (
-              <TouchableOpacity style={styles.ticketButton}>
-                <Text style={styles.ticketButtonText}>
-                  {`${ticketCount} tickets`}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
+        <Text style={styles.description}>{event.type}</Text>
+        <Text style={styles.description}>{event.location}</Text>
+        <Text style={styles.date}>{formatDate(event.endDate)}</Text>
         {showBuyButton && (
           <>
             {isOnSale && (
@@ -135,31 +99,6 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 15,
     color: "#666",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    marginTop: 8,
-  },
-  timeButton: {
-    backgroundColor: "#636366",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  timeButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  ticketButton: {
-    backgroundColor: "#636366",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-  },
-  ticketButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
   },
   bellIcon: {
     padding: 4,

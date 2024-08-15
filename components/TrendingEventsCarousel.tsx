@@ -1,22 +1,28 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, FlatList, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Dimensions, Image } from 'react-native';
 import { IEvent } from '@/types/event';
 
 interface TrendingEventsCarouselProps {
   events: IEvent[];
+  formatDate: (date: string) => string;
 }
 
 const { width } = Dimensions.get('window');
-const ITEM_WIDTH = width * 0.8;
+const ITEM_WIDTH = width * 0.7;
+const IMAGE_HEIGHT = ITEM_WIDTH * 0.65; // Adjust this ratio as needed
 
-const TrendingEventsCarousel: React.FC<TrendingEventsCarouselProps> = ({ events }) => {
+const TrendingEventsCarousel: React.FC<TrendingEventsCarouselProps> = ({ events, formatDate }) => {
+  // Sort events by end date (closest first)
+  const sortedEvents = [...events].sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+
   const renderItem = ({ item }: { item: IEvent }) => (
     <View style={styles.carouselItem}>
-      <Image 
-        source={{ uri: item.images[0]?.url || '@/assets/images/concert.png' }} 
-        style={styles.image} 
+      <Image
+        source={{ uri: item.images[0]?.url || "@/assets/images/concert.png" }}
+        style={styles.eventImage}
       />
       <Text style={styles.eventName}>{item.name}</Text>
+      <Text style={styles.eventDate}>{formatDate(item.endDate)}</Text>
     </View>
   );
 
@@ -24,7 +30,7 @@ const TrendingEventsCarousel: React.FC<TrendingEventsCarouselProps> = ({ events 
     <View style={styles.container}>
       <Text style={styles.title}>Trending Events in Tel-Aviv</Text>
       <FlatList
-        data={events}
+        data={sortedEvents}
         renderItem={renderItem}
         keyExtractor={(item) => item._id}
         horizontal
@@ -55,16 +61,21 @@ const styles = StyleSheet.create({
     width: ITEM_WIDTH,
     marginHorizontal: 10,
   },
-  image: {
-    width: '100%',
-    height: 150,
-    borderRadius: 10,
+  eventImage: {
+    width: ITEM_WIDTH,
+    height: IMAGE_HEIGHT,
+    borderRadius: 8,
+    marginBottom: 8,
   },
   eventName: {
-    color: 'white',
     fontSize: 16,
-    marginTop: 5,
-    textAlign: 'center',
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 4,
+  },
+  eventDate: {
+    fontSize: 14,
+    color: '#666',
   },
 });
 
