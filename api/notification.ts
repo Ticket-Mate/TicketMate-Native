@@ -27,6 +27,7 @@ export const unregisterUserFromEventNotification = async (userId: string, eventI
 export const getUserNotificationsRegistration = async (userId: string) => {
     try {
         const response = await apiClient.get<INotification[]>(`/notifications/user/${userId}`);
+        console.log('User notifications registration:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error getting user notifications registration:', error);

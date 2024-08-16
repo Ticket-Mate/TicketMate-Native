@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Avatar, Card, Text, ActivityIndicator, IconButton, Button, TextInput } from "react-native-paper";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Avatar, Text, ActivityIndicator, IconButton, Button, TextInput } from "react-native-paper";
 import { ThemedView } from "@/components/ThemedView";
 import { StyleSheet, FlatList, View, Alert, TouchableOpacity } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
-import { INotification } from "@/types/notification";
 import { IEvent } from "@/types/event";
 import { launchImageLibrary } from 'react-native-image-picker';
 import { getInterestsEventsByUser } from "@/api/notification";
+import { getPassedEventsByUserId } from "@/api/event";
+import { useFocusEffect } from "@react-navigation/native";
+import Card from "@/components/Card";
 
 const ProfileScreen: React.FC = () => {
   const { user, handleUpdateUser, handleLogout } = useAuth();
@@ -19,14 +21,16 @@ const ProfileScreen: React.FC = () => {
   const [newPhoto, setNewPhoto] = useState(user?.pictureUrl || '');
   const flatListRef = useRef<FlatList<IEvent>>(null);
   const [interests, setInterests] = useState<IEvent[]>([]);
+  const [ownedEvents, setOwnedEvents] = useState<IEvent[]>([]);
 
-  useEffect(() => {
-    if (user) {
-      console.log('Fetching user data');
-      fetchUserNotificationData();
-    }
-  }, [user]);
-
+  useFocusEffect(
+    useCallback(() => {
+      if (user) {
+        fetchUserNotificationData();
+        fetchOwnedEvents();
+      }
+    }, [user])
+  );
 
   const fetchUserNotificationData = async () => {
     try {
@@ -35,6 +39,15 @@ const ProfileScreen: React.FC = () => {
       console.log('Interests:', data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+    }
+  };
+
+  const fetchOwnedEvents = async () => {
+    try {
+      const data = await getPassedEventsByUserId(user?._id!);
+      setOwnedEvents(data);
+    } catch (error) {
+      console.error("Error fetching owned events:", error);
     }
   };
 
@@ -53,7 +66,6 @@ const ProfileScreen: React.FC = () => {
         firstName: newFirstName,
         lastName: newLastName,
       });
-
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating user info:', error);
@@ -95,20 +107,31 @@ const ProfileScreen: React.FC = () => {
     }
   };
 
+
+
+
+
+
+
+  // component carousel - that gets items and renders them when click right and left arrow  - gets label mypast event or my interest event 
+
+  // add navgation in other component + function that handle the click on the button  buy ticket
+
+  // use ticket details in the barcode button to open a dialog with the barcode  
+
   const renderEventItem = ({ item }: { item: IEvent }) => (
-    <Card style={styles.eventCard}>
-      <View style={styles.cardContent}>
-        <Card.Cover style={styles.cardCover} source={{ uri: item.images[0]?.url }} />
-        <View style={styles.cardTextContent}>
-          <Card.Title title={item.name} />
-          <Card.Content>
-            <Text>{formatDate(item.startDate)}</Text>
-            <Text>{item.description}</Text>
-            <Text style={styles.status}>{item.status}</Text>
-          </Card.Content>
-        </View>
-      </View>
-    </Card>
+    <View style={{ marginRight: 70 }}>
+      <Card
+        event={item}
+        isUserRegister={false}
+        onRegisterPress={() => { }}
+        ticketCount={0}
+        showCountdown={true}
+        showTicketCount={true}
+        showBuyButton={false}
+        showBellIcon={false}
+      />
+    </View>
   );
 
   const handleNext = () => {
@@ -158,11 +181,32 @@ const ProfileScreen: React.FC = () => {
           </>
         )}
       </View>
+
+      {/* Owned Events Carousel */}
+      <Text variant="headlineSmall" style={styles.interest}>My Past Events</Text>
+      <View >
+        {ownedEvents.length > 0 ? (
+          <View style={styles.carouselContainer}>
+            <FlatList
+              data={ownedEvents}
+              renderItem={renderEventItem}
+              keyExtractor={item => item._id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              pagingEnabled
+            />
+          </View>
+        ) : (
+          <Text style={styles.noInterestsMessage}>No past events found.</Text>
+        )}
+      </View>
+
+      {/* My Interests Carousel */}
       <Text variant="headlineSmall" style={styles.interest}>My Interests</Text>
-      <View style={styles.interestsSection}>
+      <View>
         {isLoading ? (
           <ActivityIndicator size="large" />
-        ) : (
+        ) : interests.length > 0 ? (
           <View style={styles.carouselContainer}>
             <IconButton
               icon="chevron-left"
@@ -177,14 +221,19 @@ const ProfileScreen: React.FC = () => {
               keyExtractor={item => item._id}
               horizontal
               showsHorizontalScrollIndicator={false}
-              onScrollToIndexFailed={() => { }}
+              onScrollToIndexFailed={(info) => {
+                const wait = new Promise(resolve => setTimeout(resolve, 500));
+                wait.then(() => {
+                  flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
+                });
+              }}
               onViewableItemsChanged={({ viewableItems }) => {
                 if (viewableItems.length > 0) {
                   setCurrentIndex(viewableItems[0].index ?? 0);
                 }
               }}
               getItemLayout={(data, index) => (
-                { length: 100, offset: 100 * index, index }
+                { length: 300, offset: 300 * index, index }
               )}
               pagingEnabled
             />
@@ -195,12 +244,15 @@ const ProfileScreen: React.FC = () => {
               style={styles.arrowButton}
             />
           </View>
+        ) : (
+          <Text style={styles.noInterestsMessage}>
+            You have not shown interests in any event.
+          </Text>
         )}
       </View>
+
       <View style={styles.logoutButtonContainer}>
-        <Button mode="contained" onPress={handleLogout} style={styles.logoutButton}>
-          Log Out
-        </Button>
+        <Button mode="outlined" onPress={handleLogout} style={styles.logoutButton}>Logout</Button>
       </View>
     </ThemedView>
   );
@@ -215,9 +267,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 80,
     alignItems: 'center',
-  },
-  interestsSection: {
-    padding: 16,
   },
   interest: {
     textAlign: 'center',
@@ -234,7 +283,7 @@ const styles = StyleSheet.create({
   },
   eventCard: {
     marginVertical: 2,
-    width: '100%',
+    width: 300,
   },
   cardContent: {
     flexDirection: 'row',
@@ -262,12 +311,19 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 10,
   },
+  noInterestsMessage: {
+    textAlign: 'center',
+    fontStyle: 'italic',
+    color: 'gray',
+  },
   logoutButtonContainer: {
     padding: 20,
   },
+
   logoutButton: {
     backgroundColor: 'rgb(155, 106, 173)',
+    marginLeft: 100,
+    marginRight: 100,
   },
 });
-
 export default ProfileScreen;

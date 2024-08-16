@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   StyleSheet,
   FlatList,
@@ -14,6 +14,7 @@ import { IEvent } from "@/types/event";
 import { useAuth } from "@/hooks/useAuth";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TicketManagementStackParamList } from "@/components/navigation/TicketManagmentNavigation";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface IEventWithTicketCount extends IEvent {
   ticketCount: number;
@@ -29,12 +30,11 @@ const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
   const [events, setEvents] = useState<IEventWithTicketCount[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user } = useAuth();
-
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     if (user?._id) {
       fetchEventsByUserId(user._id);
     }
-  }, [user?._id]);
+  }, [user?._id]));
 
   const fetchEventsByUserId = async (userId: string) => {
     try {
@@ -72,7 +72,7 @@ const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
       <Card
         event={item}
         isUserRegister={false}
-        onRegisterPress={() => {}}
+        onRegisterPress={() => { }}
         ticketCount={item.ticketCount}
         showCountdown={true}
         showTicketCount={true}

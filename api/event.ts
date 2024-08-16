@@ -11,7 +11,7 @@ export const getEvents = async (): Promise<IEvent[]> => {
   }
 };
 
-export const searchEvents = async (q:string, filter: string): Promise<IEvent[]> => {
+export const searchEvents = async (q: string, filter: string): Promise<IEvent[]> => {
   try {
     const response = await apiClient.get<IEvent[]>(`/Event?q=${q}&type=${filter}`);
     return response.data;
@@ -40,3 +40,15 @@ export const getEventsByUserId = async (userId: string): Promise<IEvent[]> => {
     throw error;
   }
 };
+
+export const getPassedEventsByUserId = async (userId: string): Promise<IEvent[]> => {
+  try {
+    const response = await apiClient.get<IEvent[]>(`/ticket/user/${userId}`);
+    const filtered = response.data.filter(event => new Date(event.endDate) < new Date());
+    return filtered;
+  } catch (error) {
+    console.error("Error fetching passed events by user ID:", error);
+    throw error;
+  }
+};
+

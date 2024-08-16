@@ -79,23 +79,24 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
     if (!expiryDate) missingFields.push("Expiry date");
     if (!cvv) missingFields.push("CVV");
     if (!agreeToTerms) missingFields.push("Agreement to Terms and Conditions");
-  
+
     if (missingFields.length > 0) {
       Alert.alert("Missing Information", `Please fill out the following fields: ${missingFields.join(", ")}`);
       return;
     }
-  
+
     if (!user || !user._id) {
       Alert.alert("User not authenticated", "Please log in to complete the purchase.");
       return;
     }
-  
+
     try {
       await purchaseTickets(user._id, selectedTickets.map(ticket => ticket._id));
       Alert.alert("Payment Successful", `You have paid for ${selectedTickets.length} tickets.`, [
-        { text: "OK", onPress: () => {
+        {
+          text: "OK", onPress: () => {
             setDialogVisible(false);
-            navigation.replace("Event", { eventId }); // Reload the event page
+            navigation.replace("Event", { eventId });
           }
         }
       ]);
