@@ -10,6 +10,10 @@ import { getPassedEventsByUserId } from "@/api/event";
 import { useFocusEffect } from "@react-navigation/native";
 import IntrestEventCarousel from "@/components/IntrestEventCarousel";
 
+const isPastDate = (date: string) => {
+  return new Date(date) < new Date();
+};
+
 const ProfileScreen: React.FC = () => {
   const { user, handleUpdateUser, handleLogout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -32,7 +36,9 @@ const ProfileScreen: React.FC = () => {
   const fetchUserNotificationData = async () => {
     try {
       const data = await getInterestsEventsByUser(user?._id!);
-      setInterests(data);
+      // Filter out past events
+      const currentAndFutureEvents = data.filter(event => !isPastDate(event.endDate));
+      setInterests(currentAndFutureEvents);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
@@ -212,7 +218,6 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
-
 
   // const formatDate = (isoDate: string) => {
   //   const date = new Date(isoDate);
