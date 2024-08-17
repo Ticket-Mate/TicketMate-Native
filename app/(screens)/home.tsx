@@ -14,6 +14,8 @@ import { getUserNotificationsRegistration, registerUserForEventNotification, unr
 import { INotification } from '@/types/notification';
 import { useAuth } from '@/hooks/useAuth';
 import { RefreshControl } from 'react-native-gesture-handler';
+import { updateUser } from '@/api/profile';
+import { useFocusEffect } from '@react-navigation/native';
 
 type HomeScreenProps = {
     navigation: StackNavigationProp<HomePageStackParamList>;
@@ -29,11 +31,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
-    useEffect(() => {
-        if (user) {
-            Promise.all([fetchEvents(), fetchUserNotificationData()]);
-        }
-    }, [user]);
+    useFocusEffect(
+        useCallback(() => {
+            if (user) {
+                Promise.all([fetchEvents(), fetchUserNotificationData()]);
+            }
+        }, [user])
+    );
 
     const fetchEvents = async () => {
         try {
@@ -41,7 +45,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             const fetchedEvents = await getEvents();
             setAllEvents(fetchedEvents);
             setFilteredEvents(fetchedEvents);
-            
+
             // Filter trending events in Tel-Aviv
             const telAvivEvents = fetchedEvents.filter(event => event.location.includes("Tel"));
             setTrendingEvents(telAvivEvents.slice(0, 5)); // Limit to 5 events for trending
@@ -64,9 +68,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     };
 
     const fetchUserNotificationData = async () => {
+        console.log('Fetching user notification data!!!!!!!!!!!!!!!');
         try {
             const data = await getUserNotificationsRegistration(user?._id!);
             setNotifications(data);
+            console.log('User ilay:', data);
         } catch (error) {
             console.error('Error creating notification:', error);
         }
@@ -80,10 +86,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 await unregisterUserFromEventNotification(user?._id!, eventId);
             }
             await fetchUserNotificationData();
+            console.log('Notification updated');
         } catch (error) {
             console.error('Error handling notification:', error);
         }
     };
+
 
     const handleBuyTicket = (eventId: string) => {
         navigation.navigate('Event', { eventId: eventId });
@@ -100,19 +108,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }, [allEvents]);
 
     const categories = [
-        { 
-            title: 'All', 
-            image: require('@/assets/images/concert.png'), 
+        {
+            title: 'All',
+            image: require('@/assets/images/concert.png'),
             onPress: () => handleCategorySelect('All')
         },
-        { 
-            title: 'Sports', 
-            image: require('@/assets/images/concert.png'), 
+        {
+            title: 'Sports',
+            image: require('@/assets/images/concert.png'),
             onPress: () => handleCategorySelect('Sports')
         },
-        { 
-            title: 'Music', 
-            image: require('@/assets/images/concert.png'), 
+        {
+            title: 'Music',
+            image: require('@/assets/images/concert.png'),
             onPress: () => handleCategorySelect('Music')
         },
     ];
@@ -126,13 +134,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             >
                 <Text style={styles.title}>TicketMate</Text>
                 <Text style={styles.greeting}>Hello, {user?.firstName}</Text>
-                
+
                 <CategoryTabs categories={categories} />
-                
+
                 <TrendingEventsCarousel events={trendingEvents} />
-                
+
                 <LastMinuteDeals events={lastMinuteEvents} onPressEvent={handleBuyTicket} />
-                
+
                 <View style={styles.eventListContainer}>
                     {filteredEvents.map(item => {
                         const isUserRegistered = notifications.some(

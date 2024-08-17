@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ThemedView } from "@/components/ThemedView";
 import { StyleSheet, View } from "react-native";
 import { Chip, Searchbar } from 'react-native-paper';
@@ -11,6 +11,7 @@ import Card from "@/components/Card";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { SearchNavigationStackParamList } from "@/components/navigation/SearchNavigation";
 import { INotification } from "@/types/notification";
+import { useFocusEffect } from "expo-router";
 
 type SearchScreenProps = {
   navigation: StackNavigationProp<SearchNavigationStackParamList>;
@@ -27,21 +28,24 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
     Sports: false,
     Art: false,
   });
+  useFocusEffect(
+    useCallback(() => {
+      const activeFilters = Object.keys(searchFilter).filter(key => searchFilter[key]);
+      console.log('Active filters:', activeFilters);
+      if (searchQuery || activeFilters.length) {
+        handleSearchEvents();
+        fetchUserNotificationData();
+      } else {
+        setEvents([])
+      }
+    }, [searchQuery, searchFilter]))
 
-  useEffect(() => {
-    const activeFilters = Object.keys(searchFilter).filter(key => searchFilter[key]);
-    if (searchQuery || activeFilters.length) {
-      handleSearchEvents();
-    }else { 
-      setEvents([])
-    }
-  }, [searchQuery, searchFilter]);
 
   const handleSearchEvents = async () => {
     try {
       setIsLoading(true);
       const activeFilters = Object.keys(searchFilter).filter(key => searchFilter[key]).join(',');
-      
+
 
       const fetchedEvents = await searchEvents(searchQuery, activeFilters);
       setEvents(fetchedEvents);
@@ -76,6 +80,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         await unregisterUserFromEventNotification(user?._id!, eventId);
       }
       await fetchUserNotificationData();
+
     } catch (error) {
       console.error('Error handling notification:', error);
     }

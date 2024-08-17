@@ -12,9 +12,9 @@ const ITEM_WIDTH = width * 0.8;
 const TrendingEventsCarousel: React.FC<TrendingEventsCarouselProps> = ({ events }) => {
   const renderItem = ({ item }: { item: IEvent }) => (
     <View style={styles.carouselItem}>
-      <Image 
-        source={{ uri: item.images[0]?.url || '@/assets/images/concert.png' }} 
-        style={styles.image} 
+      <Image
+        source={{ uri: item.images[0]?.url || '@/assets/images/concert.png' }}
+        style={styles.image}
       />
       <Text style={styles.eventName}>{item.name}</Text>
     </View>
