@@ -30,21 +30,27 @@ const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
   const [events, setEvents] = useState<IEventWithTicketCount[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user } = useAuth();
-  useFocusEffect(useCallback(() => {
-    if (user?._id) {
-      fetchEventsByUserId(user._id);
-    }
-  }, [user?._id]));
+  useFocusEffect(
+    useCallback(() => {
+      if (user?._id) {
+        fetchEventsByUserId(user._id);
+      }
+    }, [user?._id])
+  );
 
   const fetchEventsByUserId = async (userId: string) => {
     try {
       setIsLoading(true);
       const fetchedEvents = await getEventsByUserId(userId);
+      // Filter out events with "ENDED" status
+      const activeEvents = fetchedEvents.filter(
+        (event) => event.status !== "ended"
+      );
 
       // Aggregate events by unique ID and sum up ticket counts
       const eventMap: { [key: string]: IEventWithTicketCount } = {};
 
-      for (const event of fetchedEvents) {
+      for (const event of activeEvents) {
         if (!eventMap[event._id]) {
           const ticketCount = await getTicketCountByEventId(userId, event._id);
           eventMap[event._id] = { ...event, ticketCount };
@@ -72,7 +78,7 @@ const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
       <Card
         event={item}
         isUserRegister={false}
-        onRegisterPress={() => { }}
+        onRegisterPress={() => {}}
         ticketCount={item.ticketCount}
         showCountdown={true}
         showTicketCount={true}
@@ -88,7 +94,14 @@ const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
         data={events}
         keyExtractor={(item) => item._id}
         renderItem={renderEvent}
-        ListEmptyComponent={<Text>No tickets available.</Text>}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              You don't have any tickets yet. Start exploring events and grab
+              your first ticket!
+            </Text>
+          </View>
+        }
         refreshing={isLoading}
         onRefresh={() => user && fetchEventsByUserId(user._id)}
       />
@@ -100,6 +113,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50,
+  },
+  emptyText: {
+    fontSize: 18,
+    color: "#fff",
+    textAlign: "center",
   },
   headerContainer: {
     alignItems: "center",

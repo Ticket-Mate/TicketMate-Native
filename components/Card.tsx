@@ -68,18 +68,14 @@ const Card: React.FC<CardProps> = ({
           {new Date(event.startDate).toLocaleDateString()}
         </Text>
         {(showCountdown || showTicketCount) && (
-          <View style={styles.buttonContainer}>
+          <View style={styles.infoContainer}>
             {showCountdown && (
-              <TouchableOpacity style={styles.timeButton}>
-                <Text style={styles.timeButtonText}>{timeLeft}</Text>
-              </TouchableOpacity>
+              <Text style={styles.countdownText}>{timeLeft}</Text>
             )}
             {showTicketCount && ticketCount !== undefined && (
-              <TouchableOpacity style={styles.ticketButton}>
-                <Text style={styles.ticketButtonText}>
-                  {`${ticketCount} tickets`}
-                </Text>
-              </TouchableOpacity>
+              <Text style={styles.ticketCountText}>
+                {`${ticketCount} ${ticketCount === 1 ? "ticket" : "tickets"}`}
+              </Text>
             )}
           </View>
         )}
@@ -136,30 +132,21 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#666",
   },
-  buttonContainer: {
+  infoContainer: {
     flexDirection: "row",
     marginTop: 8,
+    alignItems: "center",
   },
-  timeButton: {
-    backgroundColor: "#636366",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  timeButtonText: {
+  countdownText: {
+    fontSize: 15,
     color: "#fff",
     fontWeight: "bold",
   },
-  ticketButton: {
-    backgroundColor: "#636366",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-  },
-  ticketButtonText: {
+  ticketCountText: {
+    fontSize: 15,
     color: "#fff",
     fontWeight: "bold",
+    marginLeft: 16,
   },
   bellIcon: {
     padding: 4,

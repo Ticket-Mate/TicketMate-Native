@@ -10,7 +10,11 @@ import {
   Alert,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
-import { getTicketsByUserAndEventId, updateTicketPrice, removeTicketFromSale } from "../../api/ticket";
+import {
+  getTicketsByUserAndEventId,
+  updateTicketPrice,
+  removeTicketFromSale,
+} from "../../api/ticket";
 import { getEventById } from "../../api/event";
 import { IEvent } from "@/types/event";
 import { ITicket } from "@/types/ticket";
@@ -79,23 +83,49 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
   };
 
   const handleRemoveFromSale = async (ticket: ITicket) => {
-    // Logic for removing from sale
-    try {
-      await removeTicketFromSale(ticket._id);
-      Alert.alert("Success", "Ticket has been removed from sale.");
-      // Optionally refresh the tickets list
-      if (user) {
-        const ticketsList = await getTicketsByUserAndEventId(user._id, eventId);
-        setTickets(ticketsList);
-      }
-    } catch (error) {
-      console.error("Error removing ticket from sale:", error);
-      Alert.alert("Error", "Failed to remove ticket from sale.");
-    }
+    Alert.alert(
+      "Cancel Sale",
+      "Are you sure you want to cancel the upload for sale?",
+      [
+        {
+          text: "No",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: async () => {
+            try {
+              await removeTicketFromSale(ticket._id);
+              Alert.alert("Success", "Ticket has been removed from sale.");
+              // Optionally refresh the tickets list
+              if (user) {
+                const ticketsList = await getTicketsByUserAndEventId(
+                  user._id,
+                  eventId
+                );
+                setTickets(ticketsList);
+              }
+            } catch (error) {
+              console.error("Error removing ticket from sale:", error);
+              Alert.alert("Error", "Failed to remove ticket from sale.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleUpload = async () => {
     if (!selectedTicket) return;
+    // Validation: Ensure price is a positive number
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      Alert.alert(
+        "Invalid Price",
+        "Please enter a valid price greater than zero."
+      );
+      return;
+    }
     try {
       const updatedTicket = await updateTicketPrice(selectedTicket._id, price);
       setModalVisible(false);
@@ -112,7 +142,9 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
 
   const renderTicket = ({ item }: { item: ITicket }) => {
     const timeDifference = calculateTimeDifference(event?.startDate);
-    const saleLabel = item.onSale ? `On Sale: $${item.resalePrice ? item.resalePrice : item.originalPrice}` : "Upload for Sale";
+    const saleLabel = item.onSale
+      ? `On Sale: $${item.resalePrice ? item.resalePrice : item.originalPrice}`
+      : "Upload for Sale";
 
     return (
       <View style={styles.ticketCard}>
@@ -160,7 +192,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
         <>
           <Card
             event={event}
-            isUserRegister={false} // or any logic to determine this
+            isUserRegister={false}
             showCountdown
             showBuyButton={false}
           />
@@ -188,7 +220,15 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
         }}
       >
         <View style={styles.modalView}>
-          <Text style={styles.modalText}>At what price would you like to sell the ticket?</Text>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.closeButtonText}>X</Text>
+          </TouchableOpacity>
+          <Text style={styles.modalText}>
+            At what price would you like to sell the ticket?
+          </Text>
           <TextInput
             style={styles.input}
             onChangeText={setPrice}
@@ -196,10 +236,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
             placeholder="Enter Price"
             keyboardType="numeric"
           />
-          <TouchableOpacity
-            style={styles.uploadButton}
-            onPress={handleUpload}
-          >
+          <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
             <Text style={styles.uploadButtonText}>Upload for Sale</Text>
           </TouchableOpacity>
         </View>
@@ -282,6 +319,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    padding: 10,
+    zIndex: 1,
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: "black",
+    fontWeight: "bold",
   },
   modalText: {
     marginBottom: 15,
