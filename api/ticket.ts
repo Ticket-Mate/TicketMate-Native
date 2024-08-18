@@ -64,6 +64,63 @@ export const purchaseTickets = async (
   }
 };
 
+export const emailTicketReceipt= async ( userId:string , paymentIntentId: string): Promise<void> => {
+  try {
+    await apiClient.post(`/api/payments/handle-successful-payment`, { userId, paymentIntentId });
+  } catch (error) {
+    console.error("Error emailing ticket receipt:", error);
+    throw error;
+  }
+}
+
+export const emailToSeller = async (selectedTickets: ITicket[]): Promise<void> => {
+  try {
+    // Step 1: Group tickets by ownerId and sum the resalePrice
+    const sellerData: { [key: string]: { tickets: ITicket[], totalResalePrice: number } } = {};
+
+    selectedTickets.forEach(ticket => {
+      const { ownerId, resalePrice } = ticket;
+      if (!resalePrice) return; // Skip if resalePrice is not defined
+
+      if (!sellerData[ownerId]) {
+        sellerData[ownerId] = { tickets: [], totalResalePrice: 0 };
+      }
+
+      sellerData[ownerId].tickets.push(ticket);
+      sellerData[ownerId].totalResalePrice += resalePrice;
+    });
+
+    // Step 2: Send an axios request for each seller
+    const commissionRate = 0.05; // 5% commission rate
+
+    for (const ownerId in sellerData) {
+      if (Object.prototype.hasOwnProperty.call(sellerData, ownerId)) {
+        const { tickets, totalResalePrice } = sellerData[ownerId];
+        const commissionAmount = totalResalePrice * commissionRate;
+        const totalTransferred = totalResalePrice - commissionAmount;
+
+        // Make the API request to send the email to the seller
+        await apiClient.post(`/api/payments/send-seller-email`, {
+          userId: ownerId,
+          amountSold: totalResalePrice,
+          commissionAmount,
+          totalTransferred,
+          tickets: tickets.map(ticket => ({
+            ticketId: ticket._id,
+            resalePrice: ticket.resalePrice,
+          })),
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error sending seller emails:", error);
+    throw error;
+  }
+};
+
+
+
+
 
 export const removeEventAvailableTickets = async (
   ticketId: string
