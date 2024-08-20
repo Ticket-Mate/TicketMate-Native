@@ -18,7 +18,7 @@ type SignUpScreenProps = {
 const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
   const methods = useForm<SignupData>();
   const { handleSignup, signupStatus } = useAuth();
-  const {isLoading, isError, isSuccess } = signupStatus;
+  const { isLoading, isError, isSuccess } = signupStatus;
 
   useEffect(() => {
     if (isSuccess) {
@@ -54,9 +54,15 @@ const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
           />
           <FormInput
             label="Email"
-            formKey={"email"}
+            formKey="email"
             placeholder="User Email"
-            rules={{ required: "Email is required" }}
+            rules={{
+              required: "Email is required",
+              pattern: {
+                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                message: "Please enter a valid email address",
+              },
+            }}
           />
           <FormInput
             label="Password"
@@ -70,6 +76,10 @@ const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
             text="Already have an account?"
             linkText="Login"
           />
+          {isError && <Text variant="labelMedium" style={{ color: 'red' }}>
+            Failure or Email alrady exists
+          </Text>
+          }
           <Button
             style={{ marginTop: 15 }}
             icon="send"
@@ -80,10 +90,6 @@ const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
           >
             Sign Up
           </Button>
-          {isError && <Text variant="labelMedium" style={{ color: 'red' }}>
-            Failure or Email alrady exists 
-          </Text>
-          }
           {isLoading && (
             <Modal transparent={false} animationType="none">
               <View style={styles.loadingContainer}>
