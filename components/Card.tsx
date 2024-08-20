@@ -27,7 +27,7 @@ const Card: React.FC<CardProps> = ({
   showTicketCount = false,
   showBuyButton = true,
   showBellIcon = true,
-  formatDate,
+  formatDate = () => {},
 }) => {
   const [timeLeft, setTimeLeft] = useState<string>("");
 

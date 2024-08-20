@@ -150,7 +150,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
                 <CategoryTabs categories={categories} />
 
-                <TrendingEventsCarousel events={trendingEvents} formatDate={formatDate } />
+                <TrendingEventsCarousel events={trendingEvents} formatDate={formatDate} />
 
                 <LastMinuteDeals events={lastMinuteEvents} onPressEvent={handleBuyTicket} formatDate={formatDate} selectedCategory={selectedCategory}/>
 
@@ -173,6 +173,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                                 onBuyTicket={() => handleBuyTicket(item._id)}
                                 showBuyButton={true}
                                 showBellIcon={true}
+                                showCountdown={false}
+                                showTicketCount={false}
                                 formatDate={formatDate}
                             />
                         );

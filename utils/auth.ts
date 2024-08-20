@@ -8,7 +8,7 @@ import { refreshToken } from '@/api/auth';
 
 export const getAuthToken = async (): Promise<string | undefined>  => {
     const storedUser = await AsyncStorage.getItem('user');
-    console.log(storedUser)
+    
     if (storedUser) {
         try {
             const { accessToken, lastRefreshTime, refreshToken:token, refreshTokenInterval } = JSON.parse(storedUser);
@@ -19,8 +19,6 @@ export const getAuthToken = async (): Promise<string | undefined>  => {
 
             const currentTime = dayjs();
             const elapsedTime = currentTime.diff(lastRefreshTime);
-
-            console.log(elapsedTime)
 
             if (elapsedTime >= refreshTokenInterval) {
                 const { data: user } = await refreshToken(token);

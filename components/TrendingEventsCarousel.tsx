@@ -7,10 +7,6 @@ interface TrendingEventsCarouselProps {
   formatDate: (date: string) => string;
 }
 
-const { width } = Dimensions.get('window');
-const ITEM_WIDTH = width * 0.7;
-const IMAGE_HEIGHT = ITEM_WIDTH * 0.65; // Adjust this ratio as needed
-
 const TrendingEventsCarousel: React.FC<TrendingEventsCarouselProps> = ({ events, formatDate }) => {
   // Sort events by end date (closest first)
   const sortedEvents = [...events].sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
@@ -35,7 +31,7 @@ const TrendingEventsCarousel: React.FC<TrendingEventsCarouselProps> = ({ events,
         keyExtractor={(item) => item._id}
         horizontal
         showsHorizontalScrollIndicator={false}
-        snapToInterval={ITEM_WIDTH}
+        snapToInterval={100}
         decelerationRate="fast"
         contentContainerStyle={styles.carouselContent}
       />
@@ -58,12 +54,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   carouselItem: {
-    width: ITEM_WIDTH,
+    width: 480,
     marginHorizontal: 10,
   },
   eventImage: {
-    width: ITEM_WIDTH,
-    height: IMAGE_HEIGHT,
+    width: 300,
+    height: 150,
     borderRadius: 8,
     marginBottom: 8,
   },
