@@ -30,7 +30,7 @@ const IntrestEventCarousel: React.FC<IntrestEventCarouselProps> = ({ events }) =
             <Card
                 key={item._id}
                 event={item}
-                isUserRegister={false}
+                isUserRegister={true}
                 onRegisterPress={() => { }}
                 onBuyTicket={() => handleBuyTicket(item._id)}
                 showBuyButton={true}

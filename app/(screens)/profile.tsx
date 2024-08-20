@@ -40,6 +40,7 @@ const ProfileScreen: React.FC = () => {
       const currentAndFutureEvents = data.filter(event => !isPastDate(event.endDate));
       setInterests(currentAndFutureEvents);
     } catch (error) {
+      setInterests([])
       console.error('Error fetching notifications:', error);
     }
   };
@@ -218,106 +219,3 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
-
-  // const formatDate = (isoDate: string) => {
-  //   const date = new Date(isoDate);
-  //   const day = String(date.getDate()).padStart(2, '0');
-  //   const month = String(date.getMonth() + 1).padStart(2, '0');
-  //   const year = date.getFullYear();
-  //   const hours = String(date.getHours()).padStart(2, '0');
-  //   const minutes = String(date.getMinutes()).padStart(2, '0');
-
-  //   return `${day}/${month}/${year}, ${hours}:${minutes}`;
-  // };
-  // const renderEventItem = ({ item }: { item: IEvent }) => (
-  //   <View style={{ marginRight: 70 }}>
-  //     <Card
-  //       event={item}
-  //       isUserRegister={false}
-  //       onRegisterPress={() => { }}
-  //       ticketCount={0}
-  //       showCountdown={true}
-  //       showTicketCount={true}
-  //       showBuyButton={false}
-  //       showBellIcon={false}
-  //     />
-  //   </View>
-  // );
-
-  // const handleNext = () => {
-  //   const nextIndex = (currentIndex + 1) % interests.length;
-  //   setCurrentIndex(nextIndex);
-  //   flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
-  // };
-
-  // const handlePrev = () => {
-  //   const prevIndex = (currentIndex - 1 + interests.length) % interests.length;
-  //   setCurrentIndex(prevIndex);
-  //   flatListRef.current?.scrollToIndex({ index: prevIndex, animated: true });
-  // };
-
-      // {/* Owned Events Carousel */}
-      // {/* <Text variant="headlineSmall" style={styles.interest}>My Past Events</Text>
-      // <View >
-      //   {ownedEvents.length > 0 ? (
-      //     <View style={styles.carouselContainer}>
-      //       <FlatList
-      //         data={ownedEvents}
-      //         renderItem={renderEventItem}
-      //         keyExtractor={item => item._id}
-      //         horizontal
-      //         showsHorizontalScrollIndicator={false}
-      //         pagingEnabled
-      //       />
-      //     </View>
-      //   ) : (
-      //     <Text style={styles.noInterestsMessage}>No past events found.</Text>
-      //   )}
-      // </View> */}
-      // <View>
-      //   {isLoading ? (
-      //     <ActivityIndicator size="large" />
-      //   ) : interests.length > 0 ? (
-      //     <View style={styles.carouselContainer}>
-      //       <IconButton
-      //         icon="chevron-left"
-      //         size={30}
-      //         onPress={handlePrev}
-      //         style={styles.arrowButton}
-      //       />
-      //       <FlatList
-      //         ref={flatListRef}
-      //         data={interests}
-      //         renderItem={renderEventItem}
-      //         keyExtractor={item => item._id}
-      //         horizontal
-      //         showsHorizontalScrollIndicator={false}
-      //         onScrollToIndexFailed={(info) => {
-      //           const wait = new Promise(resolve => setTimeout(resolve, 500));
-      //           wait.then(() => {
-      //             flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
-      //           });
-      //         }}
-      //         onViewableItemsChanged={({ viewableItems }) => {
-      //           if (viewableItems.length > 0) {
-      //             setCurrentIndex(viewableItems[0].index ?? 0);
-      //           }
-      //         }}
-      //         getItemLayout={(data, index) => (
-      //           { length: 300, offset: 300 * index, index }
-      //         )}
-      //         pagingEnabled
-      //       />
-      //       <IconButton
-      //         icon="chevron-right"
-      //         size={30}
-      //         onPress={handleNext}
-      //         style={styles.arrowButton}
-      //       />
-      //     </View>
-      //   ) : (
-      //     <Text style={styles.noInterestsMessage}>
-      //       You have not shown intrest in any event.
-      //     </Text>
-      //   )}
-      // // </View> */

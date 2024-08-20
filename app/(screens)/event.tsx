@@ -11,10 +11,12 @@ import { getEventById } from "@/api/event";
 import { IEvent } from "../../types/event";
 import { useAuth } from "@/hooks/useAuth";
 import { ITicket } from "../../types/ticket";
-import { purchaseTickets } from "@/api/ticket";
+import { purchaseTickets,emailTicketReceipt,emailToSeller } from "@/api/ticket";
 import { registerUserForEventNotification, unregisterUserFromEventNotification, getUserNotificationsRegistration } from "@/api/notification";
 import Ticket from "../../components/Ticket";
 import { INotification } from "@/types/notification";
+import apiClient from "../../api/apiClient"; 
+import { useStripe } from '@stripe/stripe-react-native';
 
 type EventScreenRouteProp = RouteProp<HomePageStackParamList, "Event">;
 
@@ -30,13 +32,10 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
   const [selectedTickets, setSelectedTickets] = useState<ITicket[]>([]);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
-  const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [cvv, setCvv] = useState("");
   const [includeCheckbox, setIncludeCheckbox] = useState(true);
   const [notifications, setNotifications] = useState<INotification[]>([]);
   const [isUserRegistered, setIsUserRegistered] = useState(false);
+  const { initPaymentSheet, presentPaymentSheet } = useStripe(); 
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -72,42 +71,94 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
     setDialogVisible(true);
   };
 
+  const fetchPaymentSheetParams = async (amount: number, email: string): Promise<{ clientSecret: string; paymentIntentId: string } | null> => {
+    try {
+      const response = await apiClient.post<{ clientSecret: string; paymentIntentId: string }>('/api/payments/create-payment-intent', {
+        amount,
+        email,
+      });
+      const { clientSecret, paymentIntentId } = response.data;
+      return { clientSecret, paymentIntentId };
+    } catch (error) {
+      console.error("Error fetching payment sheet parameters:", error);
+      Alert.alert("Error", "Unable to fetch payment sheet parameters.");
+      return null;
+    }
+  };
+  
+  
   const handlePayment = async () => {
-    let missingFields = [];
-    if (!cardName) missingFields.push("Card name");
-    if (!cardNumber) missingFields.push("Card number");
-    if (!expiryDate) missingFields.push("Expiry date");
-    if (!cvv) missingFields.push("CVV");
-    if (!agreeToTerms) missingFields.push("Agreement to Terms and Conditions");
-
-    if (missingFields.length > 0) {
-      Alert.alert("Missing Information", `Please fill out the following fields: ${missingFields.join(", ")}`);
+    if (!agreeToTerms) {
+      Alert.alert("Agreement Required", "You must agree to the terms and conditions to proceed.");
       return;
     }
-
+  
     if (!user || !user._id) {
       Alert.alert("User not authenticated", "Please log in to complete the purchase.");
       return;
     }
-
+  
+    // Ensure the amount is correct and in cents
+    const totalPriceInCents = Math.round(totalPrice * 100);
+  
     try {
-      await purchaseTickets(user._id, selectedTickets.map(ticket => ticket._id));
-      Alert.alert("Payment Successful", `You have paid for ${selectedTickets.length} tickets.`, [
-        {
-          text: "OK", onPress: () => {
-            setDialogVisible(false);
-            navigation.replace("Event", { eventId });
+      // Fetch the payment sheet parameters
+      const paymentSheetParams = await fetchPaymentSheetParams(totalPriceInCents, user.email);
+  
+      if (!paymentSheetParams) {
+        return;
+      }
+  
+      const { clientSecret,paymentIntentId } = paymentSheetParams;
+  
+      // Initialize the payment sheet
+      const { error: initError } = await initPaymentSheet({
+        merchantDisplayName: 'Your Merchant Name',  // Replace with your merchant name
+        paymentIntentClientSecret: clientSecret,
+      });
+  
+      if (initError) {
+        Alert.alert("Payment Initialization Error", initError.message);
+        return;
+      }
+  
+      // Present the payment sheet to the user
+      const { error: presentError } = await presentPaymentSheet();
+  
+      if (presentError) {
+        Alert.alert("Payment Error", presentError.message);
+      } else {
+        // Payment was successful
+        try {
+          await purchaseTickets(user._id, selectedTickets.map(ticket => ticket._id));
+          Alert.alert("Payment Successful", `You have paid for ${selectedTickets.length} tickets.`, [
+            {
+              text: "OK", onPress: () => {
+                emailTicketReceipt(user._id, paymentIntentId); // Call the function here
+                emailToSeller(selectedTickets)
+                setDialogVisible(false);
+                navigation.replace("Event", { eventId });
+              }
+            }
+          ]);
+        } catch (error) {
+          if (error instanceof Error) {
+            Alert.alert("Ticket Purchase Failed", error.message);
+          } else {
+            Alert.alert("Ticket Purchase Failed", "An unknown error occurred.");
           }
         }
-      ]);
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert("Payment Failed", error.message);
-      } else {
-        Alert.alert("Payment Failed", "An unknown error occurred.");
       }
+    } catch (error) {
+      Alert.alert("Payment Error", "An error occurred during payment.");
+      console.error("Payment error:", error);
     }
   };
+
+
+  
+
+  
 
   const handleRegisterNotification = async (register: boolean) => {
     try {
@@ -190,28 +241,6 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
         <Dialog.Description>
           You are about to pay for {selectedTickets.length} tickets. The total amount is ${totalPrice}.
         </Dialog.Description>
-        <Dialog.Input
-          placeholder="Card name"
-          value={cardName}
-          onChangeText={setCardName}
-        />
-        <Dialog.Input
-          placeholder="Card number"
-          keyboardType="numeric"
-          value={cardNumber}
-          onChangeText={setCardNumber}
-        />
-        <Dialog.Input
-          placeholder="Expiry date"
-          value={expiryDate}
-          onChangeText={setExpiryDate}
-        />
-        <Dialog.Input
-          placeholder="CVV"
-          keyboardType="numeric"
-          value={cvv}
-          onChangeText={setCvv}
-        />
         <View style={styles.checkboxContainer}>
           <CheckBox
             value={agreeToTerms}

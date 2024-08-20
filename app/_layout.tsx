@@ -1,3 +1,5 @@
+//  _layout.tsx
+
 import React, { useEffect } from "react";
 import "react-native-reanimated";
 import { theme } from "@/constants/theme";
