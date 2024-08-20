@@ -15,13 +15,7 @@ const SearchNavigation = () => {
     <Stack.Navigator
       initialRouteName="Search"
       screenOptions={{
-        title: "Search Screen",
-        headerStyle: {
-          backgroundColor: theme.colors.primary,
-        },
-        headerTitleStyle: {
-          fontWeight: "bold",
-        },
+        headerShown: false,
       }}
     >
       <Stack.Screen

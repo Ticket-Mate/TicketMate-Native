@@ -27,6 +27,13 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
     Music: false,
     Sports: false,
     Art: false,
+    Theater: false,
+    Comedy: false,
+    Festivals: false,
+    Conferences: false,
+    Workshops: false,
+    Exhibitions: false,
+    Networking: false,
   });
   useFocusEffect(
     useCallback(() => {
@@ -92,7 +99,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
 
   return (
     <ThemedView style={styles.container}>
-      <View style={{ top: 20, width: '90%' }}>
+      <View style={{ top: 80, width: '90%' }}>
         <Searchbar
           placeholder="Search"
           onChangeText={setSearchQuery}
@@ -111,7 +118,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
           ))}
         </View>
       </View>
-      <View style={{ top: 40, width: '90%' }}>
+      <View style={{ top: 100, width: '90%' }}>
         <FlatList
           data={events}
           keyExtractor={(item) => item._id}
