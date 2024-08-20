@@ -16,8 +16,7 @@ import { registerUserForEventNotification, unregisterUserFromEventNotification, 
 import Ticket from "../../components/Ticket";
 import { INotification } from "@/types/notification";
 import apiClient from "../../api/apiClient"; 
-import { useStripe, PaymentSheet } from '@stripe/stripe-react-native';
-import axios from 'axios';  // For API calls
+import { useStripe } from '@stripe/stripe-react-native';
 
 type EventScreenRouteProp = RouteProp<HomePageStackParamList, "Event">;
 

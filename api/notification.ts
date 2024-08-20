@@ -1,11 +1,17 @@
 import { INotification } from "@/types/notification";
 import apiClient from "./apiClient";
 import { IEvent } from "@/types/event";
+import { getAuthToken } from "@/utils/auth";
 
 export const registerUserForEventNotification = async (userId: string, eventId: string) => {
     try {
+        const token = await getAuthToken();
         const response = await apiClient.post<INotification>('/notifications', {
             userId, eventId
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
         });
         return response.data;
     } catch (error) {
@@ -16,7 +22,12 @@ export const registerUserForEventNotification = async (userId: string, eventId: 
 
 export const unregisterUserFromEventNotification = async (userId: string, eventId: string) => {
     try {
-        const response = await apiClient.delete(`/notifications/${userId}/${eventId}`);
+        const token = await getAuthToken();
+        const response = await apiClient.delete(`/notifications/${userId}/${eventId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
         return response.data;
     } catch (error) {
         console.error('Error unregistering user from event notification:', error);
@@ -26,7 +37,12 @@ export const unregisterUserFromEventNotification = async (userId: string, eventI
 
 export const getUserNotificationsRegistration = async (userId: string) => {
     try {
-        const response = await apiClient.get<INotification[]>(`/notifications/user/${userId}`);
+        const token = await getAuthToken();
+        const response = await apiClient.get<INotification[]>(`/notifications/user/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
         console.log('User notifications registration:', response.data);
         return response.data;
     } catch (error) {
@@ -37,7 +53,12 @@ export const getUserNotificationsRegistration = async (userId: string) => {
 
 export const getInterestsEventsByUser = async (userId: string) => {
     try {
-        const response = await apiClient.get<IEvent[]>(`/notifications/interests/${userId}`);
+        const token = await getAuthToken();
+        const response = await apiClient.get<IEvent[]>(`/notifications/interests/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
         return response.data;
     } catch (error) {
         console.error('Error getting interests events by user:', error);

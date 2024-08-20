@@ -13,3 +13,10 @@ export const logout = async () => {
     return apiClient.get('auth/logout');
 };
 
+export const refreshToken = async (token: string) => {
+    return await apiClient.get('auth/refresh', {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+};
