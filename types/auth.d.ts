@@ -7,7 +7,7 @@ export interface IUser {
     accessToken: string;
     refreshToken: string;
     refreshTokenInterval: number,
-    loginTime: number,
+    lastRefreshTime: number,
 };
 
 export type LoginData = {

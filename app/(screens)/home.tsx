@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ScrollView, Alert, StyleSheet, View } from 'react-native';
 import { HomePageStackParamList } from "@/components/navigation/HomePageNavigation";
 import { ThemedView } from "@/components/ThemedView";
@@ -14,6 +14,7 @@ import { getUserNotificationsRegistration, registerUserForEventNotification, unr
 import { INotification } from '@/types/notification';
 import { useAuth } from '@/hooks/useAuth';
 import { RefreshControl } from 'react-native-gesture-handler';
+import { useFocusEffect } from '@react-navigation/native';
 
 type HomeScreenProps = {
     navigation: StackNavigationProp<HomePageStackParamList>;
@@ -29,11 +30,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
-    useEffect(() => {
-        if (user) {
-            Promise.all([fetchEvents(), fetchUserNotificationData()]);
-        }
-    }, [user]);
+    useFocusEffect(
+        useCallback(() => {
+            if (user) {
+                Promise.all([fetchEvents(), fetchUserNotificationData()]);
+            }
+        }, [user])
+    );
 
     const sortEventsByEndDate = (events: IEvent[]) => {
         return events.sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
@@ -47,6 +50,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             setAllEvents(sortedEvents);
             setFilteredEvents(sortedEvents);
             
+            setAllEvents(fetchedEvents);
+            setFilteredEvents(fetchedEvents);
+
             // Filter trending events in Tel-Aviv
             const telAvivEvents = sortedEvents.filter(event => event.location.includes("Tel"));
             setTrendingEvents(telAvivEvents.slice(0, 5)); // Limit to 5 events for trending
@@ -87,10 +93,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 await unregisterUserFromEventNotification(user?._id!, eventId);
             }
             await fetchUserNotificationData();
+            console.log('Notification updated');
         } catch (error) {
             console.error('Error handling notification:', error);
         }
     };
+
 
     const handleBuyTicket = (eventId: string) => {
         navigation.navigate('Event', { eventId: eventId });
@@ -98,7 +106,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
     const handleCategorySelect = useCallback((category: string) => {
         setSelectedCategory(category);
-        if (category === 'All') {
+        if (selectedCategory === 'All') {
             setFilteredEvents(allEvents);
         } else {
             const filtered = allEvents.filter(event => event.type === category);
@@ -108,19 +116,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }, [allEvents]);
 
     const categories = [
-        { 
-            title: 'All', 
-            image: require('@/assets/images/concert.png'), 
+        {
+            title: 'All',
+            image: require('@/assets/images/concert.png'),
             onPress: () => handleCategorySelect('All')
         },
-        { 
-            title: 'Sports', 
-            image: require('@/assets/images/concert.png'), 
+        {
+            title: 'Sports',
+            image: require('@/assets/images/concert.png'),
             onPress: () => handleCategorySelect('Sports')
         },
-        { 
-            title: 'Music', 
-            image: require('@/assets/images/concert.png'), 
+        {
+            title: 'Music',
+            image: require('@/assets/images/concert.png'),
             onPress: () => handleCategorySelect('Music')
         },
     ];
@@ -139,18 +147,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             >
                 <Text style={styles.title}>TicketMate</Text>
                 <Text style={styles.greeting}>Hello, {user?.firstName}</Text>
-                
+
                 <CategoryTabs categories={categories} />
-                
-                <TrendingEventsCarousel events={trendingEvents} formatDate={formatDate} />
-                
-                <LastMinuteDeals 
-                    events={lastMinuteEvents} 
-                    onPressEvent={handleBuyTicket}
-                    selectedCategory={selectedCategory}
-                    formatDate={formatDate}
-                />
-                
+
+                <TrendingEventsCarousel events={trendingEvents} formatDate={formatDate } />
+
+                <LastMinuteDeals events={lastMinuteEvents} onPressEvent={handleBuyTicket} formatDate={formatDate} selectedCategory={selectedCategory}/>
+
                 <View style={styles.eventListContainer}>
                 <Text style={styles.subtitle}>
             All the shows

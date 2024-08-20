@@ -10,7 +10,11 @@ import {
   Alert,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
-import { getTicketsByUserAndEventId, updateTicketPrice, removeTicketFromSale } from "../../api/ticket";
+import {
+  getTicketsByUserAndEventId,
+  updateTicketPrice,
+  removeTicketFromSale,
+} from "../../api/ticket";
 import { getEventById } from "../../api/event";
 import { IEvent } from "@/types/event";
 import { ITicket } from "@/types/ticket";
@@ -19,8 +23,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { TicketManagementStackParamList } from "@/components/navigation/TicketManagmentNavigation";
-import Card from "@/components/Card"; // Ensure this path is correct
+import Card from "@/components/Card";
 import Ticket from "@/components/Ticket";
+import QRCode from 'react-native-qrcode-svg'; // Import QRCode
 
 type UserTicketsDetailsScreenRouteProps = RouteProp<
   TicketManagementStackParamList,
@@ -42,8 +47,10 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
   const [tickets, setTickets] = useState<ITicket[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [barcodeModalVisible, setBarcodeModalVisible] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
   const [price, setPrice] = useState<string>("");
+  const [barcode, setBarcode] = useState<string>("");
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -79,25 +86,49 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
   };
 
   const handleRemoveFromSale = async (ticket: ITicket) => {
-    // Logic for removing from sale
-    try {
-      await removeTicketFromSale(ticket._id);
-      Alert.alert("Success", "Ticket has been removed from sale.");
-      // Optionally refresh the tickets list
-      if (user) {
-        const ticketsList = await getTicketsByUserAndEventId(user._id, eventId);
-        setTickets(ticketsList);
-      }
-    } catch (error) {
-      console.error("Error removing ticket from sale:", error);
-      Alert.alert("Error", "Failed to remove ticket from sale.");
-    }
+    Alert.alert(
+      "Cancel Sale",
+      "Are you sure you want to cancel the upload for sale?",
+      [
+        {
+          text: "No",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: async () => {
+            try {
+              await removeTicketFromSale(ticket._id);
+              Alert.alert("Success", "Ticket has been removed from sale.");
+              if (user) {
+                const ticketsList = await getTicketsByUserAndEventId(
+                  user._id,
+                  eventId
+                );
+                setTickets(ticketsList);
+              }
+            } catch (error) {
+              console.error("Error removing ticket from sale:", error);
+              Alert.alert("Error", "Failed to remove ticket from sale.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleUpload = async () => {
     if (!selectedTicket) return;
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      Alert.alert(
+        "Invalid Price",
+        "Please enter a valid price greater than zero."
+      );
+      return;
+    }
     try {
-      const updatedTicket = await updateTicketPrice(selectedTicket._id, price);
+      await updateTicketPrice(selectedTicket._id, price);
       setModalVisible(false);
       Alert.alert("Success", "Ticket has been uploaded for sale.");
       if (user) {
@@ -110,15 +141,26 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
     }
   };
 
+  const handleBarcodePress = (item: ITicket) => {
+    if (!item) {
+      console.error("No item passed to handleBarcodePress");
+      return;
+    }
+    setBarcode(item.barcode); // Assuming barcode is available in the ticket
+    setBarcodeModalVisible(true);
+  };
+
   const renderTicket = ({ item }: { item: ITicket }) => {
     const timeDifference = calculateTimeDifference(event?.startDate);
-    const saleLabel = item.onSale ? `On Sale: $${item.resalePrice ? item.resalePrice : item.originalPrice}` : "Upload for Sale";
+    const saleLabel = item.onSale
+      ? `On Sale: $${item.resalePrice ? item.resalePrice : item.originalPrice}`
+      : "Upload for Sale";
 
     return (
       <View style={styles.ticketCard}>
         <Ticket
           ticket={item}
-          onSelect={() => {}}
+          onSelect={() => { }}
           selected={false}
           includeCheckbox={false}
         />
@@ -132,11 +174,13 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
           <TouchableOpacity
             style={[
               styles.ticketButton,
-              timeDifference <= 2 ? styles.activeButton : styles.disabledButton,
+              styles.activeButton,
+              // timeDifference <= 2 ? styles.activeButton : styles.disabledButton,
             ]}
-            disabled={timeDifference > 2}
+            // disabled={timeDifference > 2}
             onPress={() => {
-              /* Handle barcode view */
+              console.log("View Barcode button pressed");
+              handleBarcodePress(item);
             }}
           >
             <Text style={styles.ticketButtonText}>View Barcode</Text>
@@ -160,7 +204,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
         <>
           <Card
             event={event}
-            isUserRegister={false} // or any logic to determine this
+            isUserRegister={false}
             showCountdown
             showBuyButton={false}
           />
@@ -179,6 +223,8 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
       ) : (
         <Text style={styles.loadingText}>Loading event details...</Text>
       )}
+
+      {/* Modal for uploading ticket for sale */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -188,7 +234,15 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
         }}
       >
         <View style={styles.modalView}>
-          <Text style={styles.modalText}>At what price would you like to sell the ticket?</Text>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.closeButtonText}>X</Text>
+          </TouchableOpacity>
+          <Text style={styles.modalText}>
+            At what price would you like to sell the ticket?
+          </Text>
           <TextInput
             style={styles.input}
             onChangeText={setPrice}
@@ -196,12 +250,34 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
             placeholder="Enter Price"
             keyboardType="numeric"
           />
-          <TouchableOpacity
-            style={styles.uploadButton}
-            onPress={handleUpload}
-          >
+          <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
             <Text style={styles.uploadButtonText}>Upload for Sale</Text>
           </TouchableOpacity>
+        </View>
+      </Modal>
+
+      {/* Modal for displaying QR code */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={barcodeModalVisible}
+        onRequestClose={() => {
+          setBarcodeModalVisible(!barcodeModalVisible);
+        }}
+      >
+        <View style={styles.qrModalView}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setBarcodeModalVisible(false)}
+          >
+            <Text style={styles.closeButtonText}>X</Text>
+          </TouchableOpacity>
+          {event && (
+            <Text style={styles.qrModalText}>
+              Your Ticket to {event.name} barcode:
+            </Text>
+          )}
+          <QRCode value={barcode} size={200} />
         </View>
       </Modal>
     </ThemedView>
@@ -212,17 +288,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#000", // Ensure the background color contrasts with the text
+    backgroundColor: "#000",
   },
   ticketCard: {
     marginBottom: 16,
     padding: 16,
     backgroundColor: "#1E1E1E",
     borderRadius: 8,
-  },
-  ticketPosition: {
-    fontWeight: "bold",
-    color: "#FFFFFF",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -258,10 +330,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
-  onSaleText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-  },
   loadingText: {
     color: "#FFFFFF",
   },
@@ -269,6 +337,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   modalView: {
+    marginTop: 60,
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
@@ -283,26 +352,55 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  qrModalView: {
+    marginTop: 60,
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  closeButton: {
+    alignSelf: "flex-end",
+  },
+  closeButtonText: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
   modalText: {
     marginBottom: 15,
     textAlign: "center",
   },
+  qrModalText: {
+    fontSize: 15,
+    marginBottom: 15,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
   input: {
     height: 40,
-    borderColor: "gray",
+    borderColor: "#cccccc",
     borderWidth: 1,
-    marginBottom: 15,
-    width: "80%",
-    paddingLeft: 10,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    width: "100%",
   },
   uploadButton: {
     backgroundColor: "#9B6AAD",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    padding: 10,
     borderRadius: 20,
   },
   uploadButtonText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontWeight: "bold",
     textAlign: "center",
   },

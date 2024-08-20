@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { IEvent, EventStatus } from "../types/event";
+import { calculateTimer } from "../utils/timer";
 
 interface CardProps {
   event: IEvent;
   isUserRegister: boolean;
   onRegisterPress?: () => void;
   onBuyTicket?: () => void;
+  ticketCount?: number;
+  showCountdown?: boolean;
+  showTicketCount?: boolean;
   showBuyButton?: boolean;
   showBellIcon?: boolean;
   formatDate: (date: string) => string;
@@ -18,10 +22,25 @@ const Card: React.FC<CardProps> = ({
   isUserRegister,
   onRegisterPress,
   onBuyTicket,
+  ticketCount,
+  showCountdown = false,
+  showTicketCount = false,
   showBuyButton = true,
   showBellIcon = true,
   formatDate,
 }) => {
+  const [timeLeft, setTimeLeft] = useState<string>("");
+
+  useEffect(() => {
+    if (showCountdown) {
+      const interval = setInterval(() => {
+        setTimeLeft(calculateTimer(event.startDate));
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [showCountdown, event.startDate]);
+
   const isSoldOut = event.status === EventStatus.SOLD_OUT;
   const isOnSale = event.status === EventStatus.ON_SALE;
 
@@ -47,6 +66,18 @@ const Card: React.FC<CardProps> = ({
         <Text style={styles.description}>{event.type}</Text>
         <Text style={styles.description}>{event.location}</Text>
         <Text style={styles.date}>{formatDate(event.endDate)}</Text>
+        {(showCountdown || showTicketCount) && (
+          <View style={styles.infoContainer}>
+            {showCountdown && (
+              <Text style={styles.countdownText}>{timeLeft}</Text>
+            )}
+            {showTicketCount && ticketCount !== undefined && (
+              <Text style={styles.ticketCountText}>
+                {`${ticketCount} ${ticketCount === 1 ? "ticket" : "tickets"}`}
+              </Text>
+            )}
+          </View>
+        )}
         {showBuyButton && (
           <>
             {isOnSale && (
@@ -99,6 +130,22 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 15,
     color: "#666",
+  },
+  infoContainer: {
+    flexDirection: "row",
+    marginTop: 8,
+    alignItems: "center",
+  },
+  countdownText: {
+    fontSize: 15,
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  ticketCountText: {
+    fontSize: 15,
+    color: "#fff",
+    fontWeight: "bold",
+    marginLeft: 16,
   },
   bellIcon: {
     padding: 4,
