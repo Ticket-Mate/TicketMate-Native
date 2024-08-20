@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IUser, LoginData, SignupData } from '@/types/auth';
-import { login, register } from '@/api/auth'; // Adjust paths as needed
+import { login, register } from '@/api/auth';
 import { UpdateUser, updateUser } from '@/api/profile';
-import { set } from 'react-hook-form';
 
 export interface AuthContextType {
   user: IUser | null;
@@ -53,8 +52,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoginStatus({ isLoading: true, isError: false, isSuccess: false });
     try {
       const { data: user } = await login(formData);
-      setUser(user);
       await AsyncStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
       setLoginStatus({ isLoading: false, isError: false, isSuccess: true });
     } catch (e) {
       console.log(`Failed to login ${e}`);

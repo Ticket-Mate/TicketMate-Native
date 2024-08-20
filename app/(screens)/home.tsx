@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ScrollView, Alert, StyleSheet, View } from 'react-native';
 import { HomePageStackParamList } from "@/components/navigation/HomePageNavigation";
 import { ThemedView } from "@/components/ThemedView";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Button, Text } from "react-native-paper";
+import { Text } from "react-native-paper";
 import Card from '@/components/Card';
 import CategoryTabs from '@/components/CategoryTabs';
 import TrendingEventsCarousel from '@/components/TrendingEventsCarousel';
@@ -14,7 +14,6 @@ import { getUserNotificationsRegistration, registerUserForEventNotification, unr
 import { INotification } from '@/types/notification';
 import { useAuth } from '@/hooks/useAuth';
 import { RefreshControl } from 'react-native-gesture-handler';
-import { updateUser } from '@/api/profile';
 import { useFocusEffect } from '@react-navigation/native';
 
 type HomeScreenProps = {
@@ -68,11 +67,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     };
 
     const fetchUserNotificationData = async () => {
-        console.log('Fetching user notification data!!!!!!!!!!!!!!!');
         try {
             const data = await getUserNotificationsRegistration(user?._id!);
             setNotifications(data);
-            console.log('User ilay:', data);
         } catch (error) {
             console.error('Error creating notification:', error);
         }
@@ -99,7 +96,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
     const handleCategorySelect = useCallback((category: string) => {
         setSelectedCategory(category);
-        if (category === 'All') {
+        if (selectedCategory === 'All') {
             setFilteredEvents(allEvents);
         } else {
             const filtered = allEvents.filter(event => event.type === category);

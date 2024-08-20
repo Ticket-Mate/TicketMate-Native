@@ -49,6 +49,10 @@ const LoginScreen: FC<LoginScreenProps> = ({ navigation }) => {
             secureTextEntry={true}
             rules={{ required: "Password is required" }}
           />
+          {isError && <Text variant="labelMedium" style={{ color: 'red' }}>
+            Email or password incorrect
+          </Text>
+          }
           <NavigationLink
             onPress={() => navigation.navigate("Signup" as any)}
             text="Don't have an account?"

@@ -18,7 +18,7 @@ type SignUpScreenProps = {
 const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
   const methods = useForm<SignupData>();
   const { handleSignup, signupStatus } = useAuth();
-  const {isLoading, isSuccess } = signupStatus;
+  const {isLoading, isError, isSuccess } = signupStatus;
 
   useEffect(() => {
     if (isSuccess) {
@@ -80,6 +80,10 @@ const SignUpScreen: FC<SignUpScreenProps> = ({ navigation }) => {
           >
             Sign Up
           </Button>
+          {isError && <Text variant="labelMedium" style={{ color: 'red' }}>
+            Failure or Email alrady exists 
+          </Text>
+          }
           {isLoading && (
             <Modal transparent={false} animationType="none">
               <View style={styles.loadingContainer}>
