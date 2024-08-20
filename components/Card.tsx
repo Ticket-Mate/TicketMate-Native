@@ -14,6 +14,7 @@ interface CardProps {
   showTicketCount?: boolean;
   showBuyButton?: boolean;
   showBellIcon?: boolean;
+  formatDate: (date: string) => string;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -26,6 +27,7 @@ const Card: React.FC<CardProps> = ({
   showTicketCount = false,
   showBuyButton = true,
   showBellIcon = true,
+  formatDate = () => {},
 }) => {
   const [timeLeft, setTimeLeft] = useState<string>("");
 
@@ -61,12 +63,9 @@ const Card: React.FC<CardProps> = ({
             </TouchableOpacity>
           )}
         </View>
-        <Text style={styles.description}>
-          {event.description || "Description not specified"}
-        </Text>
-        <Text style={styles.date}>
-          {new Date(event.startDate).toLocaleDateString()}
-        </Text>
+        <Text style={styles.description}>{event.type}</Text>
+        <Text style={styles.description}>{event.location}</Text>
+        <Text style={styles.date}>{formatDate(event.endDate)}</Text>
         {(showCountdown || showTicketCount) && (
           <View style={styles.infoContainer}>
             {showCountdown && (

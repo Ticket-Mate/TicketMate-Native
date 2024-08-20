@@ -38,32 +38,42 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         }, [user])
     );
 
+    const sortEventsByEndDate = (events: IEvent[]) => {
+        return events.sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+    };
+
     const fetchEvents = async () => {
         try {
             setIsLoading(true);
             const fetchedEvents = await getEvents();
+            const sortedEvents = sortEventsByEndDate(fetchedEvents);
+            setAllEvents(sortedEvents);
+            setFilteredEvents(sortedEvents);
+            
             setAllEvents(fetchedEvents);
             setFilteredEvents(fetchedEvents);
 
             // Filter trending events in Tel-Aviv
-            const telAvivEvents = fetchedEvents.filter(event => event.location.includes("Tel"));
+            const telAvivEvents = sortedEvents.filter(event => event.location.includes("Tel"));
             setTrendingEvents(telAvivEvents.slice(0, 5)); // Limit to 5 events for trending
 
-            // Filter last minute deals
-            const now = new Date();
-            const fiveDaysLater = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
-            const lastMinute = fetchedEvents.filter(event => {
-                const endDate = new Date(event.endDate);
-                return endDate > now && endDate <= fiveDaysLater;
-            });
-            setLastMinuteEvents(lastMinute);
-
+            updateLastMinuteEvents(sortedEvents, 'All');
         } catch (error) {
             console.error('Error fetching events:', error);
             Alert.alert('Error', 'Failed to fetch events. Please try again.');
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const updateLastMinuteEvents = (events: IEvent[], category: string) => {
+        const now = new Date();
+        const fiveDaysLater = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
+        const lastMinute = events.filter(event => {
+            const endDate = new Date(event.endDate);
+            return endDate > now && endDate <= fiveDaysLater && (category === 'All' || event.type === category);
+        });
+        setLastMinuteEvents(lastMinute);
     };
 
     const fetchUserNotificationData = async () => {
@@ -102,6 +112,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             const filtered = allEvents.filter(event => event.type === category);
             setFilteredEvents(filtered);
         }
+        updateLastMinuteEvents(allEvents, category);
     }, [allEvents]);
 
     const categories = [
@@ -122,6 +133,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         },
     ];
 
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+    };
+
     return (
         <ThemedView style={styles.container}>
             <ScrollView
@@ -134,11 +150,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
                 <CategoryTabs categories={categories} />
 
-                <TrendingEventsCarousel events={trendingEvents} />
+                <TrendingEventsCarousel events={trendingEvents} formatDate={formatDate} />
 
-                <LastMinuteDeals events={lastMinuteEvents} onPressEvent={handleBuyTicket} />
+                <LastMinuteDeals events={lastMinuteEvents} onPressEvent={handleBuyTicket} formatDate={formatDate} selectedCategory={selectedCategory}/>
 
                 <View style={styles.eventListContainer}>
+                <Text style={styles.subtitle}>
+            All the shows
+                </Text>
                     {filteredEvents.map(item => {
                         const isUserRegistered = notifications.some(
                             (notification) => notification.eventId === item._id
@@ -153,8 +172,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                                 }
                                 onBuyTicket={() => handleBuyTicket(item._id)}
                                 showBuyButton={true}
+                                showBellIcon={true}
                                 showCountdown={false}
                                 showTicketCount={false}
+                                formatDate={formatDate}
                             />
                         );
                     })}
@@ -177,6 +198,13 @@ const styles = StyleSheet.create({
         color: 'rgb(155, 106, 173)',
         textAlign: 'center',
     },
+    subtitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: 'white',
+        marginBottom: 10,
+        marginLeft: 20,
+      },
     greeting: {
         fontSize: 18,
         color: 'white',

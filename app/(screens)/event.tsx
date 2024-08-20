@@ -17,6 +17,7 @@ import Ticket from "../../components/Ticket";
 import { INotification } from "@/types/notification";
 import apiClient from "../../api/apiClient"; 
 import { useStripe } from '@stripe/stripe-react-native';
+import { fetchPaymentSheetParams } from "@/api/payment";
 
 type EventScreenRouteProp = RouteProp<HomePageStackParamList, "Event">;
 
@@ -71,20 +72,6 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
     setDialogVisible(true);
   };
 
-  const fetchPaymentSheetParams = async (amount: number, email: string): Promise<{ clientSecret: string; paymentIntentId: string } | null> => {
-    try {
-      const response = await apiClient.post<{ clientSecret: string; paymentIntentId: string }>('/api/payments/create-payment-intent', {
-        amount,
-        email,
-      });
-      const { clientSecret, paymentIntentId } = response.data;
-      return { clientSecret, paymentIntentId };
-    } catch (error) {
-      console.error("Error fetching payment sheet parameters:", error);
-      Alert.alert("Error", "Unable to fetch payment sheet parameters.");
-      return null;
-    }
-  };
   
   
   const handlePayment = async () => {
