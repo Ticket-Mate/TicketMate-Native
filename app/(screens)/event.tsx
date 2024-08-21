@@ -91,6 +91,8 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
     try {
       // Fetch the payment sheet parameters
       const paymentSheetParams = await fetchPaymentSheetParams(totalPriceInCents, user.email);
+      
+      
   
       if (!paymentSheetParams) {
         return;
@@ -100,7 +102,7 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
   
       // Initialize the payment sheet
       const { error: initError } = await initPaymentSheet({
-        merchantDisplayName: 'Your Merchant Name',  // Replace with your merchant name
+        merchantDisplayName: 'TicketMate',  
         paymentIntentClientSecret: clientSecret,
       });
   
