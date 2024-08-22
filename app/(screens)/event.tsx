@@ -173,8 +173,10 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
     );
   }
 
-  const availableTickets = event.availableTicket as ITicket[];
-
+  const availableTickets = (event.availableTicket as ITicket[]).filter(
+    ticket => ticket.ownerId !== user?._id
+  );
+  
   return (
     <ThemedView style={styles.container}>
       <View style={styles.headerContainer}>

@@ -88,7 +88,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
   const handleRemoveFromSale = async (ticket: ITicket) => {
     Alert.alert(
       "Cancel Sale",
-      "Are you sure you want to cancel the upload for sale?",
+      "Are you sure you want to cancel the sale of this ticket?",
       [
         {
           text: "No",
@@ -154,7 +154,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
     const timeDifference = calculateTimeDifference(event?.startDate);
     const saleLabel = item.onSale
       ? `On Sale: $${item.resalePrice ? item.resalePrice : item.originalPrice}`
-      : "Upload for Sale";
+      : "List for sale";
 
     return (
       <View style={styles.ticketCard}>
@@ -251,7 +251,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
             keyboardType="numeric"
           />
           <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
-            <Text style={styles.uploadButtonText}>Upload for Sale</Text>
+            <Text style={styles.uploadButtonText}>List for sale</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -274,7 +274,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
           </TouchableOpacity>
           {event && (
             <Text style={styles.qrModalText}>
-              Your Ticket to {event.name} barcode:
+              Ticket to {event.name} barcode:
             </Text>
           )}
           <QRCode value={barcode} size={200} />
