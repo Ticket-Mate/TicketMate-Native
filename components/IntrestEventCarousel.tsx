@@ -12,7 +12,7 @@ const { width } = Dimensions.get('window');
 const ITEM_WIDTH = width * 0.8;
 
 const IntrestEventCarousel: React.FC<IntrestEventCarouselProps> = ({ events }) => {
-    const navigation = useNavigation(); // Access navigation object
+    const navigation = useNavigation();
 
     useFocusEffect(
         useCallback(() => {
@@ -36,6 +36,7 @@ const IntrestEventCarousel: React.FC<IntrestEventCarouselProps> = ({ events }) =
                 showBuyButton={true}
                 showCountdown={false}
                 showTicketCount={false}
+                showBellIcon={false}
             />
         </View>
     );
