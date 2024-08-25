@@ -25,7 +25,7 @@ import { RouteProp } from "@react-navigation/native";
 import { TicketManagementStackParamList } from "@/components/navigation/TicketManagmentNavigation";
 import Card from "@/components/Card";
 import Ticket from "@/components/Ticket";
-import QRCode from 'react-native-qrcode-svg'; // Import QRCode
+import QRCode from 'react-native-qrcode-svg';
 
 type UserTicketsDetailsScreenRouteProps = RouteProp<
   TicketManagementStackParamList,
@@ -48,6 +48,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [barcodeModalVisible, setBarcodeModalVisible] = useState(false);
+  const [messageModalVisible, setMessageModalVisible] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<ITicket | null>(null);
   const [price, setPrice] = useState<string>("");
   const [barcode, setBarcode] = useState<string>("");
@@ -83,6 +84,11 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
       setSelectedTicket(ticket);
       setModalVisible(true);
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
   };
 
   const handleRemoveFromSale = async (ticket: ITicket) => {
@@ -146,8 +152,15 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
       console.error("No item passed to handleBarcodePress");
       return;
     }
-    setBarcode(item.barcode); // Assuming barcode is available in the ticket
-    setBarcodeModalVisible(true);
+
+    const timeDifference = calculateTimeDifference(event?.startDate);
+
+    if (timeDifference > 2) {
+      setMessageModalVisible(true);
+    } else {
+      setBarcode(item.barcode);
+      setBarcodeModalVisible(true);
+    }
   };
 
   const renderTicket = ({ item }: { item: ITicket }) => {
@@ -175,9 +188,8 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
             style={[
               styles.ticketButton,
               styles.activeButton,
-              // timeDifference <= 2 ? styles.activeButton : styles.disabledButton,
+              timeDifference <= 2 ? styles.activeButton : styles.disabledButton,
             ]}
-            // disabled={timeDifference > 2}
             onPress={() => {
               console.log("View Barcode button pressed");
               handleBarcodePress(item);
@@ -207,6 +219,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
             isUserRegister={false}
             showCountdown
             showBuyButton={false}
+            formatDate={formatDate}
           />
           <FlatList
             data={tickets}
@@ -278,6 +291,31 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
             </Text>
           )}
           <QRCode value={barcode} size={200} />
+        </View>
+      </Modal>
+
+      {/* Modal for displaying message when event is more than 2 hours away */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={messageModalVisible}
+        onRequestClose={() => {
+          setMessageModalVisible(!messageModalVisible);
+        }}
+      >
+        <View style={styles.modalView}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setMessageModalVisible(false)}
+          >
+            <Text style={styles.closeButtonText}>X</Text>
+          </TouchableOpacity>
+          <Text style={styles.modalTitle}>
+            Dear customer,
+          </Text>
+          <Text style={styles.modalText}>
+            The ticket barcode will be available 2 hours before the event.
+          </Text>
         </View>
       </Modal>
     </ThemedView>
@@ -370,12 +408,20 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     alignSelf: "flex-end",
+    marginBottom: 10,
   },
   closeButtonText: {
     fontSize: 20,
     fontWeight: "bold",
   },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
   modalText: {
+    fontSize: 16,
     marginBottom: 15,
     textAlign: "center",
   },

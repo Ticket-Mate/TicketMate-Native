@@ -24,7 +24,10 @@ const IntrestEventCarousel: React.FC<IntrestEventCarouselProps> = ({ events }) =
         // Navigate to the event screen with the event ID
         navigation.navigate('Event', { eventId });
     };
-
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+    };
     const renderItem = ({ item }: { item: IEvent }) => (
         <View style={styles.carouselItem}>
             <Card
@@ -37,7 +40,7 @@ const IntrestEventCarousel: React.FC<IntrestEventCarouselProps> = ({ events }) =
                 showCountdown={false}
                 showTicketCount={false}
                 showBellIcon={false}
-            />
+                formatDate={formatDate} />
         </View>
     );
 
