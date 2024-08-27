@@ -23,6 +23,7 @@ export const getAuthToken = async (): Promise<string | undefined>  => {
             if (elapsedTime >= refreshTokenInterval) {
                 const { data: user } = await refreshToken(token);
                 await AsyncStorage.setItem('user', JSON.stringify(user));
+                return user.accessToken
             }
 
             return accessToken;
