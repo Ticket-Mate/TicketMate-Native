@@ -9,7 +9,7 @@ import CategoryTabs from '@/components/CategoryTabs';
 import TrendingEventsCarousel from '@/components/TrendingEventsCarousel';
 import LastMinuteDeals from '@/components/LastMinuteDeals';
 import { getEvents } from '../../api/event';
-import { IEvent } from '@/types/event';
+import { IEvent, EventStatus } from '@/types/event';
 import { getUserNotificationsRegistration, registerUserForEventNotification, unregisterUserFromEventNotification } from '@/api/notification';
 import { INotification } from '@/types/notification';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,26 +38,27 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         }, [user])
     );
 
-    const sortEventsByEndDate = (events: IEvent[]) => {
-        return events.sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+    const filterAndSortEvents = (events: IEvent[]): IEvent[] => {
+        const now = new Date();
+        return events
+            .filter(event => new Date(event.endDate) > now)
+            .sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
     };
 
     const fetchEvents = async () => {
         try {
             setIsLoading(true);
             const fetchedEvents = await getEvents();
-            const sortedEvents = sortEventsByEndDate(fetchedEvents);
-            setAllEvents(sortedEvents);
-            setFilteredEvents(sortedEvents);
+            const filteredAndSortedEvents = filterAndSortEvents(fetchedEvents);
             
-            setAllEvents(fetchedEvents);
-            setFilteredEvents(fetchedEvents);
+            setAllEvents(filteredAndSortedEvents);
+            setFilteredEvents(filteredAndSortedEvents);
 
             // Filter trending events in Tel-Aviv
-            const telAvivEvents = sortedEvents.filter(event => event.location.includes("Tel"));
+            const telAvivEvents = filteredAndSortedEvents.filter(event => event.location.includes("Tel"));
             setTrendingEvents(telAvivEvents.slice(0, 5)); // Limit to 5 events for trending
 
-            updateLastMinuteEvents(sortedEvents, 'All');
+            updateLastMinuteEvents(filteredAndSortedEvents, 'All');
         } catch (error) {
             console.error('Error fetching events:', error);
             Alert.alert('Error', 'Failed to fetch events. Please try again.');
@@ -99,14 +100,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         }
     };
 
-
     const handleBuyTicket = (eventId: string) => {
         navigation.navigate('Event', { eventId: eventId });
     };
 
     const handleCategorySelect = useCallback((category: string) => {
         setSelectedCategory(category);
-        if (selectedCategory === 'All') {
+        if (category === 'All') {
             setFilteredEvents(allEvents);
         } else {
             const filtered = allEvents.filter(event => event.type === category);
@@ -155,30 +155,34 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 <LastMinuteDeals events={lastMinuteEvents} onPressEvent={handleBuyTicket} formatDate={formatDate} selectedCategory={selectedCategory}/>
 
                 <View style={styles.eventListContainer}>
-                <Text style={styles.subtitle}>
-            All the shows
-                </Text>
-                    {filteredEvents.map(item => {
-                        const isUserRegistered = notifications.some(
-                            (notification) => notification.eventId === item._id
-                        );
-                        return (
-                            <Card
-                                key={item._id}
-                                event={item}
-                                isUserRegister={isUserRegistered}
-                                onRegisterPress={() =>
-                                    handleRegisterNotification(item._id, !isUserRegistered)
-                                }
-                                onBuyTicket={() => handleBuyTicket(item._id)}
-                                showBuyButton={true}
-                                showBellIcon={true}
-                                showCountdown={false}
-                                showTicketCount={false}
-                                formatDate={formatDate}
-                            />
-                        );
-                    })}
+                    <Text style={styles.subtitle}>
+                        All the shows
+                    </Text>
+                    {filteredEvents.length > 0 ? (
+                        filteredEvents.map(item => {
+                            const isUserRegistered = notifications.some(
+                                (notification) => notification.eventId === item._id
+                            );
+                            return (
+                                <Card
+                                    key={item._id}
+                                    event={item}
+                                    isUserRegister={isUserRegistered}
+                                    onRegisterPress={() =>
+                                        handleRegisterNotification(item._id, !isUserRegistered)
+                                    }
+                                    onBuyTicket={() => handleBuyTicket(item._id)}
+                                    showBuyButton={true}
+                                    showBellIcon={true}
+                                    showCountdown={false}
+                                    showTicketCount={false}
+                                    formatDate={formatDate}
+                                />
+                            );
+                        })
+                    ) : (
+                        <Text style={styles.noEventsText}>No events available at this time.</Text>
+                    )}
                 </View>
             </ScrollView>
         </ThemedView>
@@ -204,7 +208,7 @@ const styles = StyleSheet.create({
         color: 'white',
         marginBottom: 10,
         marginLeft: 20,
-      },
+    },
     greeting: {
         fontSize: 18,
         color: 'white',
@@ -213,6 +217,11 @@ const styles = StyleSheet.create({
     },
     eventListContainer: {
         paddingHorizontal: 20,
+    },
+    noEventsText: {
+        color: 'white',
+        textAlign: 'center',
+        marginTop: 20,
     },
 });
 
