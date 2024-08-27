@@ -25,7 +25,8 @@ import { RouteProp } from "@react-navigation/native";
 import { TicketManagementStackParamList } from "@/components/navigation/TicketManagmentNavigation";
 import Card from "@/components/Card";
 import Ticket from "@/components/Ticket";
-import QRCode from 'react-native-qrcode-svg'; // Import QRCode
+import QRCode from "react-native-qrcode-svg"; // Import QRCode
+import { formatDate } from "../../utils/dateFormatter";
 
 type UserTicketsDetailsScreenRouteProps = RouteProp<
   TicketManagementStackParamList,
@@ -160,7 +161,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
       <View style={styles.ticketCard}>
         <Ticket
           ticket={item}
-          onSelect={() => { }}
+          onSelect={() => {}}
           selected={false}
           includeCheckbox={false}
         />
@@ -207,6 +208,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
             isUserRegister={false}
             showCountdown
             showBuyButton={false}
+            formatDate={formatDate}
           />
           <FlatList
             data={tickets}
