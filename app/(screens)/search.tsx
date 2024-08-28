@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { ThemedView } from "@/components/ThemedView";
 import { StyleSheet, View } from "react-native";
 import { Chip, Searchbar } from 'react-native-paper';
 import { IEvent } from "@/types/event";
 import { FlatList, RefreshControl } from "react-native-gesture-handler";
-import { searchEvents } from "@/api/event";
+import { getEvents, searchEvents } from "@/api/event";
 import { getUserNotificationsRegistration, registerUserForEventNotification, unregisterUserFromEventNotification } from "@/api/notification";
 import { useAuth } from "@/hooks/useAuth";
 import Card from "@/components/Card";
@@ -20,7 +20,8 @@ type SearchScreenProps = {
 const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<INotification[]>([]);
-  const [events, setEvents] = useState<IEvent[]>([]);
+  const [allEvents, setAllEvents] = useState<IEvent[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<IEvent[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFilter, setSearchFilter] = useState<{ [key: string]: boolean }>({
@@ -35,29 +36,52 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
     Exhibitions: false,
     Networking: false,
   });
+
   useFocusEffect(
     useCallback(() => {
-      const activeFilters = Object.keys(searchFilter).filter(key => searchFilter[key]);
-      console.log('Active filters:', activeFilters);
-      if (searchQuery || activeFilters.length) {
-        handleSearchEvents();
-        fetchUserNotificationData();
-      } else {
-        setEvents([])
-      }
-    }, [searchQuery, searchFilter]))
+      fetchAllEvents();
+      fetchUserNotificationData();
+    }, [])
+  );
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+  };
+
+  const filterPastEvents = (events: IEvent[]): IEvent[] => {
+    const now = new Date();
+    return events.filter(event => new Date(event.endDate) > now);
+  };
+
+  const fetchAllEvents = async () => {
+    try {
+      setIsLoading(true);
+      const fetchedEvents = await getEvents();
+      const activeEvents = filterPastEvents(fetchedEvents);
+      setAllEvents(activeEvents);
+      setFilteredEvents(activeEvents);
+    } catch (error) {
+      console.error('Error fetching all events:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSearchEvents = async () => {
     try {
       setIsLoading(true);
       const activeFilters = Object.keys(searchFilter).filter(key => searchFilter[key]).join(',');
 
-
-      const fetchedEvents = await searchEvents(searchQuery, activeFilters);
-      setEvents(fetchedEvents);
+      if (searchQuery || activeFilters) {
+        const fetchedEvents = await searchEvents(searchQuery, activeFilters);
+        const activeEvents = filterPastEvents(fetchedEvents);
+        setFilteredEvents(activeEvents);
+      } else {
+        setFilteredEvents(allEvents);
+      }
     } catch (error) {
-      console.error('Error fetching events:', error);
+      console.error('Error searching events:', error);
     } finally {
       setIsLoading(false);
     }
@@ -68,6 +92,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       ...prevState,
       [filter]: !prevState[filter],
     }));
+    handleSearchEvents();
   };
 
   const fetchUserNotificationData = async () => {
@@ -87,7 +112,6 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         await unregisterUserFromEventNotification(user?._id!, eventId);
       }
       await fetchUserNotificationData();
-
     } catch (error) {
       console.error('Error handling notification:', error);
     }
@@ -102,7 +126,10 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       <View style={{ top: 80, width: '90%' }}>
         <Searchbar
           placeholder="Search"
-          onChangeText={setSearchQuery}
+          onChangeText={(text) => {
+            setSearchQuery(text);
+            handleSearchEvents();
+          }}
           value={searchQuery}
         />
         <View style={styles.chipContainer}>
@@ -120,10 +147,10 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       </View>
       <View style={{ top: 100, width: '90%' }}>
         <FlatList
-          data={events}
+          data={filteredEvents}
           keyExtractor={(item) => item._id}
           refreshControl={
-            <RefreshControl refreshing={isLoading} onRefresh={handleSearchEvents} />
+            <RefreshControl refreshing={isLoading} onRefresh={fetchAllEvents} />
           }
           getItemLayout={(data, index) => ({
             length: 20,
@@ -138,10 +165,9 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
               <Card
                 event={item}
                 isUserRegister={isUserRegistered}
-                onRegisterPress={() =>
-                  handleRegisterNotification(item._id, !isUserRegistered)
-                }
+                onRegisterPress={() => handleRegisterNotification(item._id, !isUserRegistered)}
                 onBuyTicket={() => handleEventPress(item._id)}
+                formatDate={formatDate}
               />
             );
           }}

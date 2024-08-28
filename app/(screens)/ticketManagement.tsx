@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TicketManagementStackParamList } from "@/components/navigation/TicketManagmentNavigation";
 import { useFocusEffect } from "@react-navigation/native";
+import { formatDate } from "../../utils/dateFormatter";
 
 interface IEventWithTicketCount extends IEvent {
   ticketCount: number;
@@ -84,6 +85,7 @@ const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
         showTicketCount={true}
         showBuyButton={false}
         showBellIcon={false}
+        formatDate={formatDate}
       />
     </TouchableOpacity>
   );

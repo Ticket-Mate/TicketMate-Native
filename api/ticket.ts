@@ -9,11 +9,12 @@ export const getTicketCountByEventId = async (
   try {
     const token = await getAuthToken();
     const response = await apiClient.get<{ ticketCount: number }>(
-      `/ticket/user/${userId}/event/${eventId}/ticketCount`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+      `/ticket/user/${userId}/event/${eventId}/ticketCount`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    }
     );
     return response.data.ticketCount;
   } catch (error) {
@@ -32,7 +33,7 @@ export const getAvailableTicketsByEventId = async (
       {
         headers: {
           Authorization: `Bearer ${token}`,
-        }
+        },
       }
     );
     return response.data;
@@ -53,7 +54,7 @@ export const getTicketsByUserAndEventId = async (
       {
         headers: {
           Authorization: `Bearer ${token}`,
-        }
+        },
       }
     );
     return response.data;
@@ -69,15 +70,18 @@ export const purchaseTickets = async (
 ): Promise<ITicket[]> => {
   try {
     const token = await getAuthToken();
-    const response = await apiClient.post<ITicket[]>(`/ticket/purchase`, {
-      userId,
-      ticketIds,
-    },
+    const response = await apiClient.post<ITicket[]>(
+      `/ticket/purchase`,
+      {
+        userId,
+        ticketIds,
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`,
-        }
-      });
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error purchasing tickets:", error);
@@ -85,20 +89,30 @@ export const purchaseTickets = async (
   }
 };
 
-export const emailTicketReceipt = async (userId: string, paymentIntentId: string): Promise<void> => {
+export const emailTicketReceipt = async (
+  userId: string,
+  paymentIntentId: string
+): Promise<void> => {
   try {
-    await apiClient.post(`/api/payments/handle-successful-payment`, { userId, paymentIntentId });
+    await apiClient.post(`/api/payments/handle-successful-payment`, {
+      userId,
+      paymentIntentId,
+    });
   } catch (error) {
     console.error("Error emailing ticket receipt:", error);
     throw error;
   }
-}
+};
 
-export const emailToSeller = async (selectedTickets: ITicket[]): Promise<void> => {
+export const emailToSeller = async (
+  selectedTickets: ITicket[]
+): Promise<void> => {
   try {
-    const sellerData: { [key: string]: { tickets: ITicket[], totalResalePrice: number } } = {};
+    const sellerData: {
+      [key: string]: { tickets: ITicket[]; totalResalePrice: number };
+    } = {};
 
-    selectedTickets.forEach(ticket => {
+    selectedTickets.forEach((ticket) => {
       const { ownerId, resalePrice } = ticket;
       if (!resalePrice) return;
 
@@ -112,7 +126,7 @@ export const emailToSeller = async (selectedTickets: ITicket[]): Promise<void> =
 
     const commissionRate = 0.05;
 
-    const token = await getAuthToken()
+    const token = await getAuthToken();
 
     for (const ownerId in sellerData) {
       if (Object.prototype.hasOwnProperty.call(sellerData, ownerId)) {
@@ -120,21 +134,24 @@ export const emailToSeller = async (selectedTickets: ITicket[]): Promise<void> =
         const commissionAmount = totalResalePrice * commissionRate;
         const totalTransferred = totalResalePrice - commissionAmount;
 
-        await apiClient.post(`/api/payments/send-seller-email`, {
-          userId: ownerId,
-          amountSold: totalResalePrice,
-          commissionAmount,
-          totalTransferred,
-          tickets: tickets.map(ticket => ({
-            ticketId: ticket._id,
-            resalePrice: ticket.resalePrice,
-          })),
-        },
+        await apiClient.post(
+          `/api/payments/send-seller-email`,
+          {
+            userId: ownerId,
+            amountSold: totalResalePrice,
+            commissionAmount,
+            totalTransferred,
+            tickets: tickets.map((ticket) => ({
+              ticketId: ticket._id,
+              resalePrice: ticket.resalePrice,
+            })),
+          },
           {
             headers: {
               Authorization: `Bearer ${token}`,
-            }
-          });
+            },
+          }
+        );
       }
     }
   } catch (error) {
@@ -147,28 +164,37 @@ export const removeEventAvailableTickets = async (
   ticketId: string
 ): Promise<void> => {
   try {
-    const token = await getAuthToken()
-    await apiClient.post(`/ticket/removeEventAvailableTickets`, { ticketId },
+    const token = await getAuthToken();
+    await apiClient.post(
+      `/ticket/removeEventAvailableTickets`,
+      { ticketId },
       {
         headers: {
           Authorization: `Bearer ${token}`,
-        }
-      });
+        },
+      }
+    );
   } catch (error) {
     console.error("Error removing event available tickets:", error);
     throw error;
   }
 };
 
-export const updateTicketPrice = async (ticketId: string, resalePrice: string): Promise<ITicket> => {
+export const updateTicketPrice = async (
+  ticketId: string,
+  resalePrice: string
+): Promise<ITicket> => {
   try {
-    const token = await getAuthToken()
-    const response = await apiClient.put<ITicket>(`/ticket/updateTicketPrice/${ticketId}`, { resalePrice, onSale: true },
+    const token = await getAuthToken();
+    const response = await apiClient.put<ITicket>(
+      `/ticket/updateTicketPrice/${ticketId}`,
+      { resalePrice, onSale: true },
       {
         headers: {
           Authorization: `Bearer ${token}`,
-        }
-      });
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error updating ticket price:", error);
@@ -178,13 +204,17 @@ export const updateTicketPrice = async (ticketId: string, resalePrice: string): 
 
 export const removeTicketFromSale = async (ticketId: string): Promise<void> => {
   try {
-    const token = await getAuthToken()
-    await apiClient.put(`/ticket/removeTicketFromSale/${ticketId}`,
+    const token = await getAuthToken();
+    console.log(token);
+    await apiClient.put(
+      `/ticket/removeTicketFromSale/${ticketId}`,
+      {},
       {
         headers: {
           Authorization: `Bearer ${token}`,
-        }
-      });
+        },
+      }
+    );
   } catch (error) {
     console.error("Error removing ticket from sale:", error);
     throw error;

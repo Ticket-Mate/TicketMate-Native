@@ -27,7 +27,7 @@ const Card: React.FC<CardProps> = ({
   showTicketCount = false,
   showBuyButton = true,
   showBellIcon = true,
-  formatDate = () => {},
+  formatDate,
 }) => {
   const [timeLeft, setTimeLeft] = useState<string>("");
 
@@ -65,7 +65,7 @@ const Card: React.FC<CardProps> = ({
         </View>
         <Text style={styles.description}>{event.type}</Text>
         <Text style={styles.description}>{event.location}</Text>
-        <Text style={styles.date}>{formatDate(event.endDate)}</Text>
+        <Text style={styles.date}>{formatDate(event.startDate)}</Text>
         {(showCountdown || showTicketCount) && (
           <View style={styles.infoContainer}>
             {showCountdown && (

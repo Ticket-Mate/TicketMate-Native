@@ -25,7 +25,9 @@ import { RouteProp } from "@react-navigation/native";
 import { TicketManagementStackParamList } from "@/components/navigation/TicketManagmentNavigation";
 import Card from "@/components/Card";
 import Ticket from "@/components/Ticket";
-import QRCode from 'react-native-qrcode-svg'; // Import QRCode
+import QRCode from "react-native-qrcode-svg"; // Import QRCode
+import { formatDate } from "../../utils/dateFormatter";
+import { longPressHandlerName } from "react-native-gesture-handler/lib/typescript/handlers/LongPressGestureHandler";
 
 type UserTicketsDetailsScreenRouteProps = RouteProp<
   TicketManagementStackParamList,
@@ -80,6 +82,25 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
     if (label.includes("On Sale")) {
       handleRemoveFromSale(ticket);
     } else {
+      if (!event) {
+        Alert.alert(
+          "Event Not Loaded",
+          "Event details are not available. Please try again later."
+        );
+        return;
+      }
+      const currentTime = new Date();
+      const eventStartTime = new Date(event.startDate);
+      const timeDifferenceInHours =
+        (eventStartTime.getTime() - currentTime.getTime()) / (1000 * 60 * 60);
+      console.log(timeDifferenceInHours);
+      if (timeDifferenceInHours <= 2) {
+        Alert.alert(
+          "Unable to Sell",
+          "Tickets cannot be sold within 2 hours of the event start time."
+        );
+        return;
+      }
       setSelectedTicket(ticket);
       setModalVisible(true);
     }
@@ -119,6 +140,8 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
 
   const handleUpload = async () => {
     if (!selectedTicket) return;
+    // Check if the event data is available
+
     const parsedPrice = parseFloat(price);
     if (isNaN(parsedPrice) || parsedPrice <= 0) {
       Alert.alert(
@@ -127,6 +150,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
       );
       return;
     }
+
     try {
       await updateTicketPrice(selectedTicket._id, price);
       setModalVisible(false);
@@ -160,7 +184,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
       <View style={styles.ticketCard}>
         <Ticket
           ticket={item}
-          onSelect={() => { }}
+          onSelect={() => {}}
           selected={false}
           includeCheckbox={false}
         />
@@ -207,6 +231,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
             isUserRegister={false}
             showCountdown
             showBuyButton={false}
+            formatDate={formatDate}
           />
           <FlatList
             data={tickets}
