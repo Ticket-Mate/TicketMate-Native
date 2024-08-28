@@ -36,7 +36,7 @@ const LastMinuteDeals: React.FC<LastMinuteDealsProps> = ({ events, onPressEvent,
           showsHorizontalScrollIndicator={false}
         />
       ) : (
-        <Text style={styles.noEventsText}>No last minute deals available for this category.</Text>
+        <Text style={styles.noEventsText}>There are no last minute deals currently</Text>
       )}
     </View>
   );

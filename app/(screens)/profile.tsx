@@ -140,7 +140,7 @@ const ProfileScreen: React.FC = () => {
         {!isEditing && (
           <>
             <View style={styles.carouselSection}>
-              <Text style={styles.title}>Events you have been:</Text>
+              <Text style={styles.title}>Events you have attended:</Text>
               {ownedEvents.length > 0 ? (
                 <IntrestEventCarousel events={ownedEvents} />
               ) : (
@@ -149,11 +149,11 @@ const ProfileScreen: React.FC = () => {
             </View>
 
             <View style={styles.carouselSection}>
-              <Text style={styles.title}>Events you have interest in:</Text>
+              <Text style={styles.title}>Events you showed interest in:</Text>
               {interests.length > 0 ? (
                 <IntrestEventCarousel events={interests} />
               ) : (
-                <Text style={styles.noEventsMessage}>You haven't shown interest in any event.</Text>
+                <Text style={styles.noEventsMessage}>You haven't shown interest in any event yet.</Text>
               )}
             </View>
           </>
