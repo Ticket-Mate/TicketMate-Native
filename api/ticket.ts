@@ -206,11 +206,15 @@ export const removeTicketFromSale = async (ticketId: string): Promise<void> => {
   try {
     const token = await getAuthToken();
     console.log(token);
-    await apiClient.put(`/ticket/removeTicketFromSale/${ticketId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    await apiClient.put(
+      `/ticket/removeTicketFromSale/${ticketId}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
   } catch (error) {
     console.error("Error removing ticket from sale:", error);
     throw error;
