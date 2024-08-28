@@ -39,6 +39,7 @@ const IntrestEventCarousel: React.FC<IntrestEventCarouselProps> = ({
         showBuyButton={true}
         showCountdown={false}
         showTicketCount={false}
+        formatDate={formatDate}
       />
     </View>
   );
