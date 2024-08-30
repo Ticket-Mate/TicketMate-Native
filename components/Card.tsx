@@ -94,6 +94,7 @@ const Card: React.FC<CardProps> = ({
         {isAboutToStart && (
           <Text style={styles.aboutToStartText}>Event is about to start!</Text>
         )}
+        {isSoldOut && <Text style={styles.soldOutText}>Sold out</Text>}
       </View>
     </View>
   );
