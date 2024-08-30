@@ -43,6 +43,9 @@ const Card: React.FC<CardProps> = ({
 
   const isSoldOut = event.status === EventStatus.SOLD_OUT;
   const isOnSale = event.status === EventStatus.ON_SALE;
+  const isAboutToStart = event.status === EventStatus.ABOUT_TO_START;
+  
+  
 
   return (
     <View style={styles.card}>
@@ -78,7 +81,7 @@ const Card: React.FC<CardProps> = ({
             )}
           </View>
         )}
-        {showBuyButton && (
+        {showBuyButton && !isSoldOut && !isAboutToStart && (
           <>
             {isOnSale && (
               <TouchableOpacity style={styles.buyButton} onPress={onBuyTicket}>
@@ -87,6 +90,9 @@ const Card: React.FC<CardProps> = ({
             )}
             {isSoldOut && <Text style={styles.soldOutText}>Sold out</Text>}
           </>
+        )}
+        {isAboutToStart && (
+          <Text style={styles.aboutToStartText}>Event is about to start!</Text>
         )}
       </View>
     </View>
@@ -165,6 +171,11 @@ const styles = StyleSheet.create({
   soldOutText: {
     color: "#FF3B30",
     fontWeight: "bold",
+    marginTop: 4,
+  },
+  aboutToStartText: {
+    color: '#FF9500',
+    fontWeight: 'bold',
     marginTop: 4,
   },
 });

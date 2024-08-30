@@ -41,7 +41,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     const filterAndSortEvents = (events: IEvent[]): IEvent[] => {
         const now = new Date();
         return events
-            .filter(event => new Date(event.endDate) > now)
+            .filter(event => new Date(event.endDate) > now && event.status !== EventStatus.ENDED)  // Exclude ended events
             .sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
     };
 
@@ -159,30 +159,34 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                         All the shows
                     </Text>
                     {filteredEvents.length > 0 ? (
-                        filteredEvents.map(item => {
-                            const isUserRegistered = notifications.some(
-                                (notification) => notification.eventId === item._id
-                            );
-                            return (
-                                <Card
-                                    key={item._id}
-                                    event={item}
-                                    isUserRegister={isUserRegistered}
-                                    onRegisterPress={() =>
-                                        handleRegisterNotification(item._id, !isUserRegistered)
-                                    }
-                                    onBuyTicket={() => handleBuyTicket(item._id)}
-                                    showBuyButton={true}
-                                    showBellIcon={true}
-                                    showCountdown={false}
-                                    showTicketCount={false}
-                                    formatDate={formatDate}
-                                />
-                            );
-                        })
-                    ) : (
-                        <Text style={styles.noEventsText}>No events available at this time.</Text>
-                    )}
+                    filteredEvents.map(item => {
+                        const isUserRegistered = notifications.some(
+                            (notification) => notification.eventId === item._id
+                        );
+
+                        // Determine whether to show the Buy Ticket button
+                        const showBuyButton = item.status !== EventStatus.ENDED && item.status !== EventStatus.ABOUT_TO_START;
+
+                        return (
+                            <Card
+                                key={item._id}
+                                event={item}
+                                isUserRegister={isUserRegistered}
+                                onRegisterPress={() =>
+                                    handleRegisterNotification(item._id, !isUserRegistered)
+                                }
+                                onBuyTicket={() => handleBuyTicket(item._id)}
+                                showBuyButton={showBuyButton}  // Pass the updated showBuyButton value
+                                showBellIcon={true}
+                                showCountdown={false}
+                                showTicketCount={false}
+                                formatDate={formatDate}
+                            />
+                        );
+                    })
+                ) : (
+                    <Text style={styles.noEventsText}>No events available at this time.</Text>
+                )}
                 </View>
             </ScrollView>
         </ThemedView>
