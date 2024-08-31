@@ -12,6 +12,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { SearchNavigationStackParamList } from "@/components/navigation/SearchNavigation";
 import { INotification } from "@/types/notification";
 import { useFocusEffect } from "expo-router";
+import Loader from "@/components/Loader";
 
 type SearchScreenProps = {
   navigation: StackNavigationProp<SearchNavigationStackParamList>;
@@ -146,7 +147,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         </View>
       </View>
       <View style={{ top: 100, width: '90%' }}>
-        <FlatList
+        {!isLoading ? (<FlatList
           data={filteredEvents}
           keyExtractor={(item) => item._id}
           refreshControl={
@@ -171,7 +172,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
               />
             );
           }}
-        />
+        />) : <View style={{ paddingTop: 200 }}><Loader /></View>}
       </View>
     </ThemedView>
   );

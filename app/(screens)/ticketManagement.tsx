@@ -16,6 +16,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { TicketManagementStackParamList } from "@/components/navigation/TicketManagmentNavigation";
 import { useFocusEffect } from "@react-navigation/native";
 import { formatDate } from "../../utils/dateFormatter";
+import Loader from "@/components/Loader";
 
 interface IEventWithTicketCount extends IEvent {
   ticketCount: number;
@@ -91,7 +92,10 @@ const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
   );
 
   return (
+    
     <ThemedView style={styles.container}>
+      {!isLoading ?
+      <>
       <FlatList
         data={events}
         keyExtractor={(item) => item._id}
@@ -107,6 +111,7 @@ const TicketManagmentScreen: React.FC<TicketManagmentScreenProps> = ({
         refreshing={isLoading}
         onRefresh={() => user && fetchEventsByUserId(user._id)}
       />
+      </> : <Loader/>}
     </ThemedView>
   );
 };

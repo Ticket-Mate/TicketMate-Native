@@ -29,7 +29,7 @@ const Card: React.FC<CardProps> = ({
   showBellIcon = true,
   formatDate,
 }) => {
-  const [timeLeft, setTimeLeft] = useState<string>("");
+  const [timeLeft, setTimeLeft] = useState<string>(calculateTimer(event.startDate));
 
   useEffect(() => {
     if (showCountdown) {

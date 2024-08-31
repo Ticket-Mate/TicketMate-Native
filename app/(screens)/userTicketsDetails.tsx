@@ -25,7 +25,8 @@ import { RouteProp } from "@react-navigation/native";
 import { TicketManagementStackParamList } from "@/components/navigation/TicketManagmentNavigation";
 import Card from "@/components/Card";
 import Ticket from "@/components/Ticket";
-import QRCode from "react-native-qrcode-svg"; // Import QRCode
+import QRCode from "react-native-qrcode-svg";
+import Loader from "@/components/Loader";
 
 type UserTicketsDetailsScreenRouteProps = RouteProp<
   TicketManagementStackParamList,
@@ -199,7 +200,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
       <View style={styles.ticketCard}>
         <Ticket
           ticket={item}
-          onSelect={() => {}}
+          onSelect={() => { }}
           selected={false}
           includeCheckbox={false}
         />
@@ -238,110 +239,115 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
 
   return (
     <ThemedView style={styles.container}>
-      {event ? (
+      {!isLoading ?
         <>
-          <Card
-            event={event}
-            isUserRegister={false}
-            showCountdown
-            showBuyButton={false}
-            formatDate={formatDate}
-          />
-          <FlatList
-            data={tickets}
-            keyExtractor={(item) => item._id}
-            renderItem={renderTicket}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>
-                No tickets available for this event.
-              </Text>
-            }
-            refreshing={isLoading}
-          />
-        </>
-      ) : (
-        <Text style={styles.loadingText}>Loading event details...</Text>
-      )}
-
-      {/* Modal for uploading ticket for sale */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.modalView}>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalVisible(false)}
-          >
-            <Text style={styles.closeButtonText}>X</Text>
-          </TouchableOpacity>
-          <Text style={styles.modalText}>
-            At what price would you like to sell the ticket?
-          </Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={setPrice}
-            value={price}
-            placeholder="Enter Price"
-            keyboardType="numeric"
-          />
-          <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
-            <Text style={styles.uploadButtonText}>List for sale</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-
-      {/* Modal for displaying QR code */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={barcodeModalVisible}
-        onRequestClose={() => {
-          setBarcodeModalVisible(!barcodeModalVisible);
-        }}
-      >
-        <View style={styles.qrModalView}>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setBarcodeModalVisible(false)}
-          >
-            <Text style={styles.closeButtonText}>X</Text>
-          </TouchableOpacity>
-          {event && (
-            <Text style={styles.qrModalText}>
-              Ticket to {event.name} barcode:
-            </Text>
+          {event ? (
+            <>
+              <Card
+                event={event}
+                isUserRegister={false}
+                showCountdown
+                showBuyButton={false}
+                formatDate={formatDate}
+              />
+              <FlatList
+                data={tickets}
+                keyExtractor={(item) => item._id}
+                renderItem={renderTicket}
+                ListEmptyComponent={
+                  <Text style={styles.emptyText}>
+                    No tickets available for this event.
+                  </Text>
+                }
+                refreshing={isLoading}
+              />
+            </>
+          ) : (
+            <Text style={styles.loadingText}>Loading event details...</Text>
           )}
-          <QRCode value={barcode} size={200} />
-        </View>
-      </Modal>
 
-      {/* Modal for displaying message when event is more than 2 hours away */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={messageModalVisible}
-        onRequestClose={() => {
-          setMessageModalVisible(!messageModalVisible);
-        }}
-      >
-        <View style={styles.modalView}>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setMessageModalVisible(false)}
+          {/* Modal for uploading ticket for sale */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              setModalVisible(!modalVisible);
+            }}
           >
-            <Text style={styles.closeButtonText}>X</Text>
-          </TouchableOpacity>
-          <Text style={styles.modalTitle}>Dear customer,</Text>
-          <Text style={styles.modalText}>
-            The ticket barcode will be available 2 hours before the event.
-          </Text>
-        </View>
-      </Modal>
+            <View style={styles.modalView}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>X</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalText}>
+                At what price would you like to sell the ticket?
+              </Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={setPrice}
+                value={price}
+                placeholder="Enter Price"
+                keyboardType="numeric"
+              />
+              <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+                <Text style={styles.uploadButtonText}>List for sale</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+
+          {/* Modal for displaying QR code */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={barcodeModalVisible}
+            onRequestClose={() => {
+              setBarcodeModalVisible(!barcodeModalVisible);
+            }}
+          >
+            <View style={styles.qrModalView}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setBarcodeModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>X</Text>
+              </TouchableOpacity>
+              {event && (
+                <Text style={styles.qrModalText}>
+                  Ticket to {event.name} barcode:
+                </Text>
+              )}
+              <QRCode value={barcode} size={200} />
+            </View>
+          </Modal>
+
+          {/* Modal for displaying message when event is more than 2 hours away */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={messageModalVisible}
+            onRequestClose={() => {
+              setMessageModalVisible(!messageModalVisible);
+            }}
+          >
+            <View style={styles.modalView}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setMessageModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>X</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Dear customer,</Text>
+              <Text style={styles.modalText}>
+                The ticket barcode will be available 2 hours before the event.
+              </Text>
+            </View>
+          </Modal>
+        </>
+        : <Loader />
+      }
     </ThemedView>
   );
 };
