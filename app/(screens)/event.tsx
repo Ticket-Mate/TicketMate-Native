@@ -187,7 +187,7 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
         <View style={styles.eventDetailsContainer}>
           <Text style={styles.eventName}>{event.name}</Text>
           <Text style={styles.eventLocation}>
-            Palau Sant Jordi, Barcelona
+            {event.location}
           </Text>
           <Text style={styles.eventDate}>
             {new Date(event.startDate).toLocaleDateString()}
