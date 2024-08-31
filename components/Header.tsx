@@ -1,10 +1,8 @@
 import React, { FC } from "react";
 import { Image, StyleSheet, SafeAreaView } from "react-native";
-import { Text, useTheme } from "react-native-paper";
+import { Text } from "react-native-paper";
 
 const Header: FC = () => {
-  const { colors } = useTheme();
-
   return (
     <SafeAreaView style={styles.container}>
       <Image style={styles.logo} source={require('../assets/images/logo.png')} />

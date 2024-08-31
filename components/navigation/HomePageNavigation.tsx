@@ -17,18 +17,30 @@ const Stack = createStackNavigator<HomePageStackParamList>();
 
 const HomePageNavigation = () => {
   const { user } = useAuth();
+  const theme = useTheme()
 
   return (
     <Stack.Navigator
       initialRouteName={user ? "Home" : "Login"}
       screenOptions={{
         headerShown: false,
+        headerStyle: {
+          backgroundColor: theme.colors.primary,
+        },
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
+        headerTintColor: 'black', 
       }}
     >
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignUpScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Event" component={EventScreen} options={{ headerShown: true }} />
+      <Stack.Screen name="Event" component={EventScreen} 
+       options={{
+        headerShown:true,        
+      }}
+      />
     </Stack.Navigator>
   );
 };

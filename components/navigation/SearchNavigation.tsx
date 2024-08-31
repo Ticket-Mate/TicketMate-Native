@@ -16,6 +16,13 @@ const SearchNavigation = () => {
       initialRouteName="Search"
       screenOptions={{
         headerShown: false,
+        headerStyle: {
+          backgroundColor: theme.colors.primary,
+        },
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
+        headerTintColor: 'black', 
       }}
     >
       <Stack.Screen
@@ -28,12 +35,6 @@ const SearchNavigation = () => {
         options={{
           headerShown: true,
           title: "Event Details",
-          headerStyle: {
-            backgroundColor: theme.colors.primary,
-          },
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
         }}
       />
     </Stack.Navigator>
