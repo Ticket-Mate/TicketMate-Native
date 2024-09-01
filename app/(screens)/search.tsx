@@ -127,7 +127,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
           placeholder="Search"
           onChangeText={(text) => {
             setSearchQuery(text);
-            handleSearchEvents();
+            handleSearchEvents(searchFilter);
           }}
           value={searchQuery}
         />
