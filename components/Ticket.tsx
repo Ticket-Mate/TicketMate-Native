@@ -36,7 +36,9 @@ const Ticket: FC<TicketProps> = ({ ticket, onSelect, selected, includeCheckbox }
           </View>
           {ticket.onSale && <View style={styles.ticketCurrentPrice}>
             <Text style={styles.priceText}>Current Price</Text>
-            <Text style={styles.infoText}>${ticket.resalePrice}</Text>
+            <Text style={styles.infoText}>
+              ${ticket?.resalePrice ? ticket.resalePrice : ticket.originalPrice }
+            </Text>
           </View>}
         </View>
         <View style={styles.separatorLine} />

@@ -30,7 +30,7 @@ const LoginScreen: FC<LoginScreenProps> = ({ navigation }) => {
 
   return (
     <FormProvider {...methods}>
-      <ThemedView>
+      <ThemedView style={{paddingTop:100}}>
         <Header />
         <View style={styles.container}>
           <Text variant="headlineSmall" style={styles.containerHeader}>

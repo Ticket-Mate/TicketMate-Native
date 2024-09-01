@@ -16,6 +16,7 @@ const TicketManagementNavigation = () => {
     <Stack.Navigator
       initialRouteName="TicketManagement"
       screenOptions={{
+        title: "Ticket Management",
         headerShown: true,
         headerStyle: {
           backgroundColor: theme.colors.primary,

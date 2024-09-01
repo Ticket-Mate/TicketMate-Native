@@ -15,6 +15,7 @@ import { INotification } from '@/types/notification';
 import { useAuth } from '@/hooks/useAuth';
 import { RefreshControl } from 'react-native-gesture-handler';
 import { useFocusEffect } from '@react-navigation/native';
+import Loader from '@/components/Loader';
 
 type HomeScreenProps = {
     navigation: StackNavigationProp<HomePageStackParamList>;
@@ -50,7 +51,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             setIsLoading(true);
             const fetchedEvents = await getEvents();
             const filteredAndSortedEvents = filterAndSortEvents(fetchedEvents);
-            
+
             setAllEvents(filteredAndSortedEvents);
             setFilteredEvents(filteredAndSortedEvents);
 
@@ -139,57 +140,62 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     };
 
     return (
-        <ThemedView style={styles.container}>
-            <ScrollView
-                refreshControl={
-                    <RefreshControl refreshing={isLoading} onRefresh={fetchEvents} />
-                }
-            >
-                <Text style={styles.title}>TicketMate</Text>
-                <Text style={styles.greeting}>Hello, {user?.firstName}</Text>
+        !isLoading ? 
+            <>
+                <ThemedView style={styles.container}>
+                    <ScrollView
+                        refreshControl={
+                            <RefreshControl refreshing={isLoading} onRefresh={fetchEvents} />
+                        }
+                    >
+                        <Text style={styles.title}>TicketMate</Text>
+                        <Text style={styles.greeting}>Hello, {user?.firstName}</Text>
 
-                <CategoryTabs categories={categories} />
+                        <CategoryTabs categories={categories} />
 
-                <TrendingEventsCarousel events={trendingEvents} formatDate={formatDate} />
+                        <TrendingEventsCarousel events={trendingEvents} formatDate={formatDate} />
 
-                <LastMinuteDeals events={lastMinuteEvents} onPressEvent={handleBuyTicket} formatDate={formatDate} selectedCategory={selectedCategory}/>
+                        <LastMinuteDeals events={lastMinuteEvents} onPressEvent={handleBuyTicket} formatDate={formatDate} selectedCategory={selectedCategory} />
 
-                <View style={styles.eventListContainer}>
-                    <Text style={styles.subtitle}>
-                        All the shows
-                    </Text>
-                    {filteredEvents.length > 0 ? (
-                    filteredEvents.map(item => {
-                        const isUserRegistered = notifications.some(
-                            (notification) => notification.eventId === item._id
-                        );
+                        <View style={styles.eventListContainer}>
+                            <Text style={styles.subtitle}>
+                                All the shows
+                            </Text>
+                            {filteredEvents.length > 0 ? (
+                                filteredEvents.map(item => {
+                                    const isUserRegistered = notifications.some(
+                                        (notification) => notification.eventId === item._id
+                                    );
 
-                        // Determine whether to show the Buy Ticket button
-                        const showBuyButton = item.status !== EventStatus.ENDED && item.status !== EventStatus.ABOUT_TO_START;
+                                    // Determine whether to show the Buy Ticket button
+                                    const showBuyButton = item.status !== EventStatus.ENDED && item.status !== EventStatus.ABOUT_TO_START;
 
-                        return (
-                            <Card
-                                key={item._id}
-                                event={item}
-                                isUserRegister={isUserRegistered}
-                                onRegisterPress={() =>
-                                    handleRegisterNotification(item._id, !isUserRegistered)
-                                }
-                                onBuyTicket={() => handleBuyTicket(item._id)}
-                                showBuyButton={showBuyButton}  // Pass the updated showBuyButton value
-                                showBellIcon={true}
-                                showCountdown={false}
-                                showTicketCount={false}
-                                formatDate={formatDate}
-                            />
-                        );
-                    })
-                ) : (
-                    <Text style={styles.noEventsText}>No events available at this time.</Text>
-                )}
-                </View>
-            </ScrollView>
-        </ThemedView>
+                                    return (
+                                        <Card
+                                            key={item._id}
+                                            event={item}
+                                            isUserRegister={isUserRegistered}
+                                            onRegisterPress={() =>
+                                                handleRegisterNotification(item._id, !isUserRegistered)
+                                            }
+                                            onBuyTicket={() => handleBuyTicket(item._id)}
+                                            showBuyButton={showBuyButton}  // Pass the updated showBuyButton value
+                                            showBellIcon={true}
+                                            showCountdown={false}
+                                            showTicketCount={false}
+                                            formatDate={formatDate}
+                                        />
+                                    );
+                                })
+                            ) : (
+                                <Text style={styles.noEventsText}>No events available at this time.</Text>
+                            )}
+                        </View>
+                    </ScrollView>
+                </ThemedView>
+            </>
+        : 
+            <Loader />
     );
 };
 
