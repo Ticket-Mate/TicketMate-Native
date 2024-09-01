@@ -69,12 +69,12 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
     }
   };
 
-  const handleSearchEvents = async () => {
+  const handleSearchEvents = async (filters:{ [key: string]: boolean }) => {
     try {
       setIsLoading(true);
-      const activeFilters = Object.keys(searchFilter).filter(key => searchFilter[key]).join(',');
+      const activeFilters = Object.keys(filters).filter(key => filters[key]).join(',');
 
-      if (searchQuery || activeFilters) {
+      if (searchQuery || activeFilters.length) {
         const fetchedEvents = await searchEvents(searchQuery, activeFilters);
         const activeEvents = filterPastEvents(fetchedEvents);
         setFilteredEvents(activeEvents);
@@ -89,11 +89,9 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
   };
 
   const handleFilterChange = (filter: string) => {
-    setSearchFilter(prevState => ({
-      ...prevState,
-      [filter]: !prevState[filter],
-    }));
-    handleSearchEvents();
+    const filters = {...searchFilter, [filter]: !searchFilter[filter]}
+    setSearchFilter(filters);
+    handleSearchEvents(filters);
   };
 
   const fetchUserNotificationData = async () => {
