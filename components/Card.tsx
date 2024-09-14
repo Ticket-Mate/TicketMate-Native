@@ -44,8 +44,13 @@ const Card: React.FC<CardProps> = ({
   const isSoldOut = event.status === EventStatus.SOLD_OUT;
   const isOnSale = event.status === EventStatus.ON_SALE;
   const isAboutToStart = event.status === EventStatus.ABOUT_TO_START;
-  
-  
+
+  // פונקציה לחילוץ השעה מתוך המחרוזת, שם חדש למניעת בלבול
+  const formatPerformanceTime = (dateString: string) => {
+    const date = new Date(dateString);
+    // מחזיר את השעה בפורמט "HH:MM"
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
 
   return (
     <View style={styles.card}>
@@ -66,9 +71,16 @@ const Card: React.FC<CardProps> = ({
             </TouchableOpacity>
           )}
         </View>
+
+        {/* הצגת השעה בלבד עם הפונקציה החדשה */}
+        <Text style={styles.performanceTime}>
+          {`Performance Time: ${formatPerformanceTime(event.performanceTime)}`}
+        </Text>
+
         <Text style={styles.description}>{event.type}</Text>
         <Text style={styles.description}>{event.location}</Text>
         <Text style={styles.date}>{formatDate(event.startDate)}</Text>
+
         {(showCountdown || showTicketCount) && (
           <View style={styles.infoContainer}>
             {showCountdown && (
@@ -81,6 +93,7 @@ const Card: React.FC<CardProps> = ({
             )}
           </View>
         )}
+
         {showBuyButton && !isSoldOut && !isAboutToStart && (
           <>
             {isOnSale && (
@@ -91,6 +104,7 @@ const Card: React.FC<CardProps> = ({
             {isSoldOut && <Text style={styles.soldOutText}>Sold out</Text>}
           </>
         )}
+
         {isAboutToStart && (
           <Text style={styles.aboutToStartText}>Event is about to start!</Text>
         )}
@@ -129,6 +143,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     flex: 1,
     color: "white",
+  },
+  performanceTime: {
+    fontSize: 14,
+    color: "#FF9500", // Adjust the color or style as needed
+    marginBottom: 4,
   },
   description: {
     fontSize: 15,

@@ -19,8 +19,10 @@ export interface IEvent {
   seatmap: string;
   startDate: string;
   endDate: string;
+  performanceTime: string;  // Add this line
   createdAt: string;
   updatedAt: string;
   location: string;
   availableTicket: ITicket[];
 }
+
