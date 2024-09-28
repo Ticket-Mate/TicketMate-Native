@@ -43,6 +43,7 @@ const UserTicketsDetailsScreen: React.FC<UserTicketsDetailsScreenProps> = ({
   navigation,
 }) => {
   const { eventId } = route.params;
+  console.log('eventId', eventId)
   const { user } = useAuth();
   const [event, setEvent] = useState<IEvent | null>(null);
   const [tickets, setTickets] = useState<ITicket[]>([]);

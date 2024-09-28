@@ -45,7 +45,20 @@ const Card: React.FC<CardProps> = ({
   const isOnSale = event.status === EventStatus.ON_SALE;
   const isAboutToStart = event.status === EventStatus.ABOUT_TO_START;
   
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+
+    // אם השעה היא 0 עד 11, זה בבוקר
+    if (hours < 12) {
+        return `${hours.toString()}:${minutes}`; // מציג את השעה כפי שהיא בבוקר
+    } else {
+        return `${hours}:${minutes}`; // מציג את השעה בפורמט 24 שעות אחר הצהריים
+    }
+};
   
+
 
   return (
     <View style={styles.card}>
@@ -69,6 +82,7 @@ const Card: React.FC<CardProps> = ({
         <Text style={styles.description}>{event.type}</Text>
         <Text style={styles.description}>{event.location}</Text>
         <Text style={styles.date}>{formatDate(event.startDate)}</Text>
+        <Text style={styles.time}>Start time :{formatTime(event.startDate)}</Text>  
         {(showCountdown || showTicketCount) && (
           <View style={styles.infoContainer}>
             {showCountdown && (
@@ -179,6 +193,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 4,
   },
+  time: {
+    fontSize: 15,
+    color: "#666",
+  },
+
 });
 
 export default Card;

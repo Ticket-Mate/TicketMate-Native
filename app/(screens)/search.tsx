@@ -117,7 +117,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
   };
 
   const handleEventPress = (eventId: string) => {
-    navigation.navigate("userTicketsDetails", { eventId });
+    navigation.navigate("Event", { eventId: eventId });
   };
 
   return (
@@ -162,6 +162,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
             );
             return (
               <Card
+                key={item._id}
                 event={item}
                 isUserRegister={isUserRegistered}
                 onRegisterPress={() => handleRegisterNotification(item._id, !isUserRegistered)}
