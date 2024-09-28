@@ -25,7 +25,7 @@ const IntrestEventCarousel: React.FC<IntrestEventCarouselProps> = ({
 
   const handleBuyTicket = (eventId: string) => {
     // Navigate to the event screen with the event ID
-    navigation.navigate("Event", { eventId });
+    navigation.navigate("Event", { eventId: eventId }) ;
   };
 
   const renderItem = ({ item }: { item: IEvent }) => (

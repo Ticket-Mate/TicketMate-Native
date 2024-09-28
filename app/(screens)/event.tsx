@@ -237,7 +237,9 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
             value={agreeToTerms}
             onValueChange={setAgreeToTerms}
           />
-          <Text style={styles.checkboxLabel}>I agree to the Terms and Conditions</Text>
+          <Dialog.Description>
+          I agree to the Terms and Conditions
+          </Dialog.Description>
         </View>
         <Dialog.Button label="Cancel" onPress={() => setDialogVisible(false)} />
         <Dialog.Button label="Pay" onPress={handlePayment} />
