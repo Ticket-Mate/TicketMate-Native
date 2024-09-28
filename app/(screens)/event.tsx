@@ -185,14 +185,16 @@ const EventScreen: FC<EventScreenProps> = ({ route, navigation }) => {
           style={styles.eventImage}
         />
         <View style={styles.eventDetailsContainer}>
-          <Text style={styles.eventName}>{event.name}</Text>
-          <Text style={styles.eventLocation}>
-            {event.location}
-          </Text>
-          <Text style={styles.eventDate}>
-            {new Date(event.startDate).toLocaleDateString()}
-          </Text>
-        </View>
+        <Text style={styles.eventName}>{event.name}</Text>
+        <Text style={styles.eventLocation}>
+          {event.location}
+        </Text>
+        <Text style={styles.eventDate}>
+          {new Date(event.startDate).toLocaleDateString()}{" "}
+          {new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </Text>
+      </View>
+
       </View>
       <View style={styles.ticketsContainer}>
         {availableTickets.length > 0 ? (
