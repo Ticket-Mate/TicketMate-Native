@@ -48,12 +48,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     return events
       .filter(
         (event) =>
-          new Date(event.endDate) > now && event.status !== EventStatus.ENDED
-      ) // Exclude ended events
+          new Date(event.endDate) > now && event.status !== EventStatus.ENDED && event.status !== EventStatus.STARTED
+      ) // Exclude ended and started events
       .sort(
         (a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
       );
   };
+  
 
   const fetchEvents = async () => {
     try {
